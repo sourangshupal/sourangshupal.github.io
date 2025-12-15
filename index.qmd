@@ -1,5 +1,5 @@
 ---
-title: "blog"
+title: "AI Blogs | RAG | LLMs | Multi-Agent Systems"
 listing:
   contents: posts
   feed: true
