@@ -1,6 +1,5 @@
 /.quarto/
+/_site/
 **/*.quarto_ipynb
-!docs/.nojekyll
-
 
 .venv
