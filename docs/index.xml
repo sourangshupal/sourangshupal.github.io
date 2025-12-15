@@ -5,16 +5,16 @@
       xmlns:dc="http://purl.org/dc/elements/1.1/" 
       version="2.0">
 <channel>
-<title>blog</title>
-<link>https://your-website-url.example.com/</link>
-<atom:link href="https://your-website-url.example.com/index.xml" rel="self" type="application/rss+xml"/>
-<description>A blog built with Quarto</description>
+<title>Sourangshu Pal</title>
+<link>https://sourangshupal.github.io/</link>
+<atom:link href="https://sourangshupal.github.io/index.xml" rel="self" type="application/rss+xml"/>
+<description>AI, Machine Learning, and Modern Tech Insights</description>
 <generator>quarto-1.8.26</generator>
 <lastBuildDate>Sun, 14 Dec 2025 18:30:00 GMT</lastBuildDate>
 <item>
   <title>Post With Code</title>
   <dc:creator>Harlow Malloc</dc:creator>
-  <link>https://your-website-url.example.com/posts/post-with-code/</link>
+  <link>https://sourangshupal.github.io/posts/post-with-code/</link>
   <description><![CDATA[ 
 
 
@@ -29,14 +29,14 @@
   <category>news</category>
   <category>code</category>
   <category>analysis</category>
-  <guid>https://your-website-url.example.com/posts/post-with-code/</guid>
+  <guid>https://sourangshupal.github.io/posts/post-with-code/</guid>
   <pubDate>Sun, 14 Dec 2025 18:30:00 GMT</pubDate>
-  <media:content url="https://your-website-url.example.com/posts/post-with-code/image.jpg" medium="image" type="image/jpeg"/>
+  <media:content url="https://sourangshupal.github.io/posts/post-with-code/image.jpg" medium="image" type="image/jpeg"/>
 </item>
 <item>
   <title>Welcome to My AI Blog</title>
   <dc:creator>Sourangshu Pal</dc:creator>
-  <link>https://your-website-url.example.com/posts/welcome/</link>
+  <link>https://sourangshupal.github.io/posts/welcome/</link>
   <description><![CDATA[ 
 
 
@@ -126,7 +126,7 @@ font-style: inherit;">0.3</span>)</span>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="https://your-website-url.example.com/posts/welcome/index_files/figure-html/cell-2-output-1.png" width="832" height="376" class="figure-img"></p>
+<p><img src="https://sourangshupal.github.io/posts/welcome/index_files/figure-html/cell-2-output-1.png" width="832" height="376" class="figure-img"></p>
 </figure>
 </div>
 </div>
@@ -149,9 +149,9 @@ font-style: inherit;">0.3</span>)</span>
  ]]></description>
   <category>news</category>
   <category>AI</category>
-  <guid>https://your-website-url.example.com/posts/welcome/</guid>
+  <guid>https://sourangshupal.github.io/posts/welcome/</guid>
   <pubDate>Sun, 14 Dec 2025 18:30:00 GMT</pubDate>
-  <media:content url="https://your-website-url.example.com/posts/welcome/image.jpg" medium="image" type="image/jpeg"/>
+  <media:content url="https://sourangshupal.github.io/posts/welcome/image.jpg" medium="image" type="image/jpeg"/>
 </item>
 </channel>
 </rss>
