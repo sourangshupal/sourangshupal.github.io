@@ -9,9 +9,37 @@
   {
     "objectID": "posts/welcome/index.html",
     "href": "posts/welcome/index.html",
-    "title": "Welcome To My Blog",
+    "title": "Welcome to My AI Blog",
     "section": "",
-    "text": "This is the first post in a Quarto blog. Welcome!\n\nSince this post doesn’t specify an explicit image, the first image in the post will be used in the listing page of posts."
+    "text": "I’m excited to launch this blog where I’ll be sharing insights about AI, machine learning, and practical applications of modern AI systems."
+  },
+  {
+    "objectID": "posts/welcome/index.html#welcome",
+    "href": "posts/welcome/index.html#welcome",
+    "title": "Welcome to My AI Blog",
+    "section": "",
+    "text": "I’m excited to launch this blog where I’ll be sharing insights about AI, machine learning, and practical applications of modern AI systems."
+  },
+  {
+    "objectID": "posts/welcome/index.html#what-you-can-expect",
+    "href": "posts/welcome/index.html#what-you-can-expect",
+    "title": "Welcome to My AI Blog",
+    "section": "What You Can Expect",
+    "text": "What You Can Expect\nAs a Senior AI Consultant, I work daily with:\n\nMulti-agent systems\nRAG (Retrieval-Augmented Generation) architectures\nVector databases and semantic search\nLLM applications and frameworks\n\nI’ll be sharing tutorials, best practices, and real-world examples from my work."
+  },
+  {
+    "objectID": "posts/welcome/index.html#quick-demo-simple-python-code",
+    "href": "posts/welcome/index.html#quick-demo-simple-python-code",
+    "title": "Welcome to My AI Blog",
+    "section": "Quick Demo: Simple Python Code",
+    "text": "Quick Demo: Simple Python Code\nLet’s start with a simple example to show how code works in these posts:\n\nimport numpy as np\nimport matplotlib.pyplot as plt\n\n# Generate some sample data\nx = np.linspace(0, 10, 100)\ny = np.sin(x)\n\n# Create a plot\nplt.figure(figsize=(10, 4))\nplt.plot(x, y, 'b-', linewidth=2)\nplt.title('Welcome to My Blog!')\nplt.xlabel('X')\nplt.ylabel('sin(X)')\nplt.grid(True, alpha=0.3)\nplt.show()"
+  },
+  {
+    "objectID": "posts/welcome/index.html#coming-soon",
+    "href": "posts/welcome/index.html#coming-soon",
+    "title": "Welcome to My AI Blog",
+    "section": "Coming Soon",
+    "text": "Coming Soon\nI’m planning posts on:\n\nBuilding production RAG systems\nVector database comparisons\nLangChain vs LlamaIndex\nMulti-modal AI applications\n\nStay tuned!"
   },
   {
     "objectID": "posts/post-with-code/index.html",
@@ -25,6 +53,6 @@
     "href": "index.html",
     "title": "blog",
     "section": "",
-    "text": "Post With Code\n\n\n\nnews\n\ncode\n\nanalysis\n\n\n\n\n\n\n\n\n\nDec 15, 2025\n\n\nHarlow Malloc\n\n\n\n\n\n\n\n\n\n\n\n\nWelcome To My Blog\n\n\n\nnews\n\n\n\n\n\n\n\n\n\nDec 12, 2025\n\n\nTristan O’Malley\n\n\n\n\n\nNo matching items"
+    "text": "Post With Code\n\n\n\nnews\n\ncode\n\nanalysis\n\n\n\n\n\n\n\n\n\nDec 15, 2025\n\n\nHarlow Malloc\n\n\n\n\n\n\n\n\n\n\n\n\nWelcome to My AI Blog\n\n\n\nnews\n\nAI\n\n\n\n\n\n\n\n\n\nDec 15, 2025\n\n\nSourangshu Pal\n\n\n\n\n\nNo matching items"
   }
 ]

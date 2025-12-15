@@ -1,0 +1,12 @@
+{
+  "hash": "28935d06335112bd4554d30180857f98",
+  "result": {
+    "engine": "jupyter",
+    "markdown": "---\ntitle: \"Welcome to My AI Blog\"\nauthor: \"Sourangshu Pal\"\ndate: \"2025-12-15\"\ncategories: [news, AI]\nimage: \"image.jpg\"  # Optional: add a cover image later\n---\n\n## Welcome!\n\nI'm excited to launch this blog where I'll be sharing insights about AI, machine learning, and practical applications of modern AI systems.\n\n## What You Can Expect\n\nAs a Senior AI Consultant, I work daily with:\n\n- Multi-agent systems\n- RAG (Retrieval-Augmented Generation) architectures\n- Vector databases and semantic search\n- LLM applications and frameworks\n\nI'll be sharing tutorials, best practices, and real-world examples from my work.\n\n## Quick Demo: Simple Python Code\n\nLet's start with a simple example to show how code works in these posts:\n\n::: {#a2e6dc1b .cell execution_count=1}\n``` {.python .cell-code}\nimport numpy as np\nimport matplotlib.pyplot as plt\n\n# Generate some sample data\nx = np.linspace(0, 10, 100)\ny = np.sin(x)\n\n# Create a plot\nplt.figure(figsize=(10, 4))\nplt.plot(x, y, 'b-', linewidth=2)\nplt.title('Welcome to My Blog!')\nplt.xlabel('X')\nplt.ylabel('sin(X)')\nplt.grid(True, alpha=0.3)\nplt.show()\n```\n\n::: {.cell-output .cell-output-display}\n![](index_files/figure-html/cell-2-output-1.png){width=832 height=376}\n:::\n:::\n\n\n## Coming Soon\n\nI'm planning posts on:\n\n- Building production RAG systems\n- Vector database comparisons\n- LangChain vs LlamaIndex\n- Multi-modal AI applications\n\nStay tuned!\n\n",
+    "supporting": [
+      "index_files"
+    ],
+    "filters": [],
+    "includes": {}
+  }
+}
