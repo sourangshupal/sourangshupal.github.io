@@ -135,6 +135,15 @@ a:hover {
 #quarto-content {
   max-width: 1200px;
   margin: 0 auto;
+  padding: 0 2rem;
+}
+
+#quarto-margin-sidebar {
+  padding-right: 1rem;
+}
+
+.page-columns {
+  padding: 0 1rem;
 }
 
 .quarto-title-block {
@@ -152,10 +161,19 @@ a:hover {
 
 /* ===== BLOG LISTING / CARD STYLES ===== */
 .quarto-listing {
+  gap: 2rem;
+  margin: 2rem 0;
+  padding: 0 1rem;
+}
+
+#listing-listing {
+  padding: 1rem;
+}
+
+.list.grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
   gap: 2rem;
-  margin: 2rem 0;
 }
 
 .quarto-post,

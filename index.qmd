@@ -1,15 +1,15 @@
 ---
-title: "AI Blogs | RAG | LLMs | Multi-Agent Systems"
-listing:
-  contents: posts
-  feed: true
-  sort: "date desc"
-  type: default
-  categories: true
-  sort-ui: false
-  filter-ui: false
-page-layout: full
+title: "Welcome to My Blog"
+page-layout: article
 title-block-banner: true
 ---
+
+## AI, Machine Learning & Modern Tech
+
+Welcome to my blog where I share insights about artificial intelligence, machine learning, and practical applications of modern AI systems.
+
+### Recent Posts
+
+Check out my latest articles on AI and machine learning below.
 
 
