@@ -1,0 +1,132 @@
+---
+title: "Building Your First RAG Pipeline"
+date: "2025-12-10"
+categories: [RAG, LLM, Python, Tutorial]
+description: "A practical walkthrough of Retrieval-Augmented Generation — from chunking documents to serving answers — with working Python code."
+image: rag-pipeline.png
+author: "Sourangshu Pal"
+---
+
+Retrieval-Augmented Generation (RAG) is one of the most practical ways to make a large language model useful on your own data. The core idea is simple: before you ask the LLM a question, retrieve relevant documents from your own store and inject them into the prompt. The model answers from the retrieved context, not from memorized training data.
+
+## Why RAG and Not Fine-Tuning?
+
+Fine-tuning is expensive, slow, and requires retraining whenever your data changes. RAG lets you update the knowledge base (your vector store) without touching the model. For most enterprise use cases — internal docs, customer support, code search — RAG wins on cost and iteration speed.
+
+## The Four-Stage Pipeline
+
+A minimal RAG system has four stages:
+
+```
+Source Documents → Chunker → Embedder → Vector Store
+                                              ↑
+                                         Query Time:
+                                         Query → Embed → Retrieve → LLM → Answer
+```
+
+### Stage 1: Chunking
+
+Long documents don't fit in a single embedding or a single prompt. Split them into overlapping chunks so context is preserved across boundaries.
+
+```python
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+
+splitter = RecursiveCharacterTextSplitter(
+    chunk_size=512,
+    chunk_overlap=50,
+    separators=["\n\n", "\n", ". ", " "],
+)
+chunks = splitter.split_text(document_text)
+```
+
+**Tip:** Use `chunk_overlap=50` as a baseline. For technical docs with dense references, go higher (100–150).
+
+### Stage 2: Embedding
+
+Convert each chunk into a dense vector. OpenAI's `text-embedding-3-large` with 3072 dimensions gives state-of-the-art retrieval quality.
+
+```python
+from openai import AsyncOpenAI
+
+client = AsyncOpenAI()
+
+async def embed(texts: list[str]) -> list[list[float]]:
+    response = await client.embeddings.create(
+        model="text-embedding-3-large",
+        input=texts,
+        dimensions=3072,
+    )
+    return [item.embedding for item in response.data]
+```
+
+### Stage 3: Storing in a Vector Database
+
+Qdrant is a fast, production-ready vector database with first-class Python support.
+
+```python
+from qdrant_client import AsyncQdrantClient, models
+
+client = AsyncQdrantClient(url="http://localhost:6333")
+
+await client.upsert(
+    collection_name="my_docs",
+    points=[
+        models.PointStruct(
+            id=i,
+            vector={"dense": embedding},
+            payload={"text": chunk, "source": filename},
+        )
+        for i, (chunk, embedding) in enumerate(zip(chunks, embeddings))
+    ],
+)
+```
+
+### Stage 4: Retrieval and Generation
+
+At query time, embed the question, retrieve the top-k chunks, build a prompt, and call the LLM.
+
+```python
+from openai import AsyncOpenAI
+
+async def answer(question: str, top_k: int = 5) -> str:
+    q_vec = (await embed([question]))[0]
+
+    results = await qdrant.query_points(
+        collection_name="my_docs",
+        query=q_vec,
+        using="dense",
+        limit=top_k,
+        with_payload=True,
+    )
+
+    context = "\n\n".join(r.payload["text"] for r in results.points)
+
+    response = await openai_client.chat.completions.create(
+        model="gpt-4o",
+        messages=[
+            {"role": "system", "content": "Answer using only the provided context. If unsure, say so."},
+            {"role": "user", "content": f"Context:\n{context}\n\nQuestion: {question}"},
+        ],
+        temperature=0.0,
+    )
+    return response.choices[0].message.content
+```
+
+## Common Failure Modes
+
+| Problem | Cause | Fix |
+|---|---|---|
+| Low recall | Chunks too large | Reduce chunk size to 256–512 tokens |
+| Hallucinations | Context not injected correctly | Log the prompt, verify context is present |
+| Slow ingest | Embedding one-at-a-time | Batch embed 100 chunks per API call |
+| Stale answers | Vector store not updated | Build an incremental update pipeline |
+
+## What's Next
+
+Once you have a working pipeline, the next steps are:
+
+1. **Hybrid search** — combine dense vectors with BM25 keyword search for better recall on technical terms
+2. **Reranking** — use a cross-encoder to reorder retrieved chunks before passing to the LLM
+3. **Evaluation** — measure answer quality with RAGAS (`faithfulness`, `context_recall`, `answer_relevancy`)
+
+RAG is not magic. A well-chunked, well-indexed knowledge base paired with a tight prompt is what makes the difference between a demo and a production system.

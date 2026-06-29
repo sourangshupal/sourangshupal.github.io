@@ -1,23 +1,177 @@
 [
   {
-    "objectID": "about.html",
-    "href": "about.html",
-    "title": "About",
+    "objectID": "posts.html",
+    "href": "posts.html",
+    "title": "Posts",
     "section": "",
-    "text": "About this blog"
+    "text": "Building Your First RAG Pipeline\n\n\n\nRAG\n\nLLM\n\nPython\n\nTutorial\n\n\n\nA practical walkthrough of Retrieval-Augmented Generation — from chunking documents to serving answers — with working Python code.\n\n\n\n\n\nDec 10, 2025\n\n\nSourangshu Pal\n\n\n\n\n\n\n\n\n\n\n\n\nLLM Fundamentals Every Engineer Should Know\n\n\n\nLLM\n\nML\n\nFundamentals\n\n\n\nThe concepts under the hood you need before building production AI systems — tokens, context windows, temperature, and the things nobody tells you.\n\n\n\n\n\nDec 5, 2025\n\n\nSourangshu Pal\n\n\n\n\n\n\n\n\n\n\n\n\nVector Databases Explained\n\n\n\nVector DB\n\nQdrant\n\nSearch\n\nInfrastructure\n\n\n\nWhat vector databases actually do, how approximate nearest neighbor search works, and how to choose and configure one for your AI application.\n\n\n\n\n\nNov 28, 2025\n\n\nSourangshu Pal\n\n\n\n\n\nNo matching items"
   },
   {
     "objectID": "index.html",
     "href": "index.html",
-    "title": "Welcome to My Blog",
+    "title": "Sourangshu Pal",
     "section": "",
-    "text": "Welcome to my blog where I share insights about artificial intelligence, machine learning, and practical applications of modern AI systems.\n\n\nCheck out my latest articles on AI and machine learning below."
+    "text": "Writing about production AI systems — RAG pipelines, LLMs, vector search, and the engineering details that matter."
   },
   {
     "objectID": "index.html#ai-machine-learning-modern-tech",
     "href": "index.html#ai-machine-learning-modern-tech",
-    "title": "Welcome to My Blog",
+    "title": "Sourangshu Pal",
     "section": "",
-    "text": "Welcome to my blog where I share insights about artificial intelligence, machine learning, and practical applications of modern AI systems.\n\n\nCheck out my latest articles on AI and machine learning below."
+    "text": "Writing about production AI systems — RAG pipelines, LLMs, vector search, and the engineering details that matter."
+  },
+  {
+    "objectID": "posts/llm-fundamentals/index.html",
+    "href": "posts/llm-fundamentals/index.html",
+    "title": "LLM Fundamentals Every Engineer Should Know",
+    "section": "",
+    "text": "Building on top of large language models is mostly an API integration problem. But when things break — and they will — you need to know what’s actually happening inside. This post covers the concepts that matter most for engineers working with LLMs in production."
+  },
+  {
+    "objectID": "posts/llm-fundamentals/index.html#tokens-not-words",
+    "href": "posts/llm-fundamentals/index.html#tokens-not-words",
+    "title": "LLM Fundamentals Every Engineer Should Know",
+    "section": "Tokens, Not Words",
+    "text": "Tokens, Not Words\nLLMs don’t see words. They see tokens — subword units produced by a byte-pair encoding (BPE) tokenizer. The rule of thumb: 1 token ≈ 0.75 English words, or ~4 characters.\nThis matters for three reasons:\n\nCost: pricing is per-token, not per-word\nLimits: context windows are measured in tokens\nSurprises: \"unhelpful\" might be 1 token while \"xyyzz4928\" might be 5\n\nimport tiktoken\n\nenc = tiktoken.encoding_for_model(\"gpt-4o\")\ntokens = enc.encode(\"The transformer architecture scales remarkably well.\")\nprint(len(tokens))  # 9\nAlways count tokens before sending to the API — a request that exceeds the context window throws a hard error."
+  },
+  {
+    "objectID": "posts/llm-fundamentals/index.html#context-windows",
+    "href": "posts/llm-fundamentals/index.html#context-windows",
+    "title": "LLM Fundamentals Every Engineer Should Know",
+    "section": "Context Windows",
+    "text": "Context Windows\nThe context window is the total number of tokens the model can “see” at once — input plus output combined. GPT-4o supports 128k tokens. This is large enough that most applications fit comfortably, but naive approaches still hit limits:\n\nSystem prompt: ~500 tokens\nRetrieved context (RAG): 5 chunks × 512 tokens = 2,560 tokens\nConversation history: grows without bound if you don’t truncate\n\nThe practical rule: reserve at least 4k tokens for the model’s output. Everything else is input budget."
+  },
+  {
+    "objectID": "posts/llm-fundamentals/index.html#temperature-and-sampling",
+    "href": "posts/llm-fundamentals/index.html#temperature-and-sampling",
+    "title": "LLM Fundamentals Every Engineer Should Know",
+    "section": "Temperature and Sampling",
+    "text": "Temperature and Sampling\nTemperature controls how “creative” the model is. Technically, it scales the logit distribution before softmax — higher values flatten the distribution (more randomness), lower values sharpen it (more deterministic).\n\n\n\nTemperature\nUse Case\n\n\n\n\n0.0\nFact extraction, classification, structured output\n\n\n0.3–0.5\nSummarization, Q&A systems\n\n\n0.7–1.0\nCreative writing, brainstorming\n\n\n&gt;1.0\nRarely useful in production\n\n\n\nFor RAG and data pipelines, always use temperature=0.0. You want reproducible, factual answers — not creative ones."
+  },
+  {
+    "objectID": "posts/llm-fundamentals/index.html#system-prompts-are-load-bearing",
+    "href": "posts/llm-fundamentals/index.html#system-prompts-are-load-bearing",
+    "title": "LLM Fundamentals Every Engineer Should Know",
+    "section": "System Prompts Are Load-Bearing",
+    "text": "System Prompts Are Load-Bearing\nThe system prompt shapes everything. A weak system prompt is the most common reason a “good model” gives bad results. Key principles:\n\nBe explicit about what the model should and should not do\nState the output format, not just the task\nInclude examples (few-shot) for complex or unusual tasks\nTest it: prompt injection is real, and adversarial users will try to override it\n\nSYSTEM = \"\"\"You are a technical support assistant.\nAnswer only questions about our product.\nIf the question is off-topic, say: \"I can only answer questions about Product X.\"\nAlways respond in plain English, no markdown.\n\"\"\""
+  },
+  {
+    "objectID": "posts/llm-fundamentals/index.html#hallucinations-are-a-probability-problem",
+    "href": "posts/llm-fundamentals/index.html#hallucinations-are-a-probability-problem",
+    "title": "LLM Fundamentals Every Engineer Should Know",
+    "section": "Hallucinations Are a Probability Problem",
+    "text": "Hallucinations Are a Probability Problem\nLLMs are not search engines. They predict the next probable token. When the model doesn’t “know” something, it produces plausible-sounding output — which is a hallucination.\nMitigation strategies ranked by effectiveness:\n\nRAG — ground answers in retrieved documents, include the source\nSelf-consistency — sample the same question 3× at temperature=0.7, return the majority answer\nStructured output — force the model to output JSON with a \"confidence\" field; set a threshold\nVerification prompts — ask the model “Is the answer above supported by the context?” as a second call\n\nNone of these eliminate hallucinations. They reduce them."
+  },
+  {
+    "objectID": "posts/llm-fundamentals/index.html#the-real-cost-of-long-context",
+    "href": "posts/llm-fundamentals/index.html#the-real-cost-of-long-context",
+    "title": "LLM Fundamentals Every Engineer Should Know",
+    "section": "The Real Cost of Long Context",
+    "text": "The Real Cost of Long Context\n128k token context windows are impressive, but “lost in the middle” is a real phenomenon: LLMs attend more strongly to content at the beginning and end of the context window. Content buried in the middle gets underweighted.\nPractical consequences:\n\nPut the most important instructions at the top of the system prompt\nIn RAG, put the highest-ranked chunk first in the context block\nDon’t assume adding more context always improves quality — sometimes it degrades it"
+  },
+  {
+    "objectID": "posts/llm-fundamentals/index.html#structured-outputs",
+    "href": "posts/llm-fundamentals/index.html#structured-outputs",
+    "title": "LLM Fundamentals Every Engineer Should Know",
+    "section": "Structured Outputs",
+    "text": "Structured Outputs\nModern OpenAI models support JSON mode and structured outputs via response schemas. Use these whenever you need machine-readable responses.\nfrom pydantic import BaseModel\nfrom openai import AsyncOpenAI\n\nclass AnalysisResult(BaseModel):\n    sentiment: str\n    confidence: float\n    summary: str\n\nclient = AsyncOpenAI()\n\nresponse = await client.beta.chat.completions.parse(\n    model=\"gpt-4o\",\n    messages=[{\"role\": \"user\", \"content\": \"Analyze: 'The product is excellent but shipping was slow.'\"}],\n    response_format=AnalysisResult,\n)\nresult = response.choices[0].message.parsed  # typed AnalysisResult object\nThis is more reliable than asking the model to “respond in JSON” and then parsing the output yourself."
+  },
+  {
+    "objectID": "posts/llm-fundamentals/index.html#prompt-caching",
+    "href": "posts/llm-fundamentals/index.html#prompt-caching",
+    "title": "LLM Fundamentals Every Engineer Should Know",
+    "section": "Prompt Caching",
+    "text": "Prompt Caching\nIf your system prompt is large and repeated across many calls, OpenAI’s prompt caching reduces latency and cost. Cached input tokens cost 50% less. The cache key is based on the exact prefix — so keep your system prompt stable and put dynamic content at the end.\nUnderstanding these fundamentals turns debugging from guesswork into diagnosis. When an LLM application fails, the root cause is almost always one of: token budget exceeded, temperature too high for a deterministic task, system prompt underspecified, or context not properly injected."
+  },
+  {
+    "objectID": "posts/vector-databases/index.html",
+    "href": "posts/vector-databases/index.html",
+    "title": "Vector Databases Explained",
+    "section": "",
+    "text": "Every RAG system, semantic search engine, and recommendation feature built on embeddings needs a vector database. But “vector database” is a term that gets overloaded. This post explains what’s actually happening, where the complexity lives, and how to configure Qdrant — the best open-source option — for production use."
+  },
+  {
+    "objectID": "posts/vector-databases/index.html#what-problem-do-they-solve",
+    "href": "posts/vector-databases/index.html#what-problem-do-they-solve",
+    "title": "Vector Databases Explained",
+    "section": "What Problem Do They Solve?",
+    "text": "What Problem Do They Solve?\nAn embedding model turns text (or images, audio, etc.) into a dense float vector — say, 1536 or 3072 numbers. Semantic similarity maps to geometric proximity: similar meanings → nearby vectors in the embedding space.\nThe search problem is: given a query vector, find the k most similar vectors in a collection of millions or billions. Exact nearest neighbor search is O(n) — you’d compute the cosine distance between your query and every stored vector. At 10M vectors with 1536 dimensions, that’s 30 billion float operations per query. Too slow.\nVector databases solve this with Approximate Nearest Neighbor (ANN) algorithms. They trade a small accuracy loss for orders-of-magnitude speed gains."
+  },
+  {
+    "objectID": "posts/vector-databases/index.html#how-hnsw-works",
+    "href": "posts/vector-databases/index.html#how-hnsw-works",
+    "title": "Vector Databases Explained",
+    "section": "How HNSW Works",
+    "text": "How HNSW Works\nThe dominant ANN algorithm today is Hierarchical Navigable Small World (HNSW). The key intuitions:\n\nGraph structure: Vectors are nodes. Similar vectors are connected by edges.\nHierarchical layers: Multiple layers of graphs, coarser at the top, denser at the bottom. Entry is at the top layer.\nGreedy search: Start at a random node in the top layer, greedily traverse to the nearest neighbor, then descend to the next layer and repeat.\n\nThe result: search is O(log n). At 10M vectors, you’re exploring hundreds of candidates instead of millions.\nThe two knobs that matter for HNSW:\n\n\n\n\n\n\n\n\n\nParameter\nEffect\nDefault\nWhen to Increase\n\n\n\n\nm\nEdges per node\n16\nHigher recall on sparse data\n\n\nef_construct\nBuild-time search width\n100\nBetter index quality, slower build\n\n\n\nfrom qdrant_client.models import VectorParams, Distance, HnswConfigDiff\n\nawait client.create_collection(\n    collection_name=\"my_docs\",\n    vectors_config={\n        \"dense\": VectorParams(\n            size=3072,\n            distance=Distance.COSINE,\n            hnsw_config=HnswConfigDiff(\n                m=16,           # standard\n                ef_construct=100,  # increase to 200 for better recall\n            ),\n        )\n    },\n)"
+  },
+  {
+    "objectID": "posts/vector-databases/index.html#dense-vs.-sparse-vs.-hybrid-search",
+    "href": "posts/vector-databases/index.html#dense-vs.-sparse-vs.-hybrid-search",
+    "title": "Vector Databases Explained",
+    "section": "Dense vs. Sparse vs. Hybrid Search",
+    "text": "Dense vs. Sparse vs. Hybrid Search\n\nDense Vectors\nGenerated by neural embedding models. Capture semantic meaning. Struggle with exact keyword matching and rare terms (e.g., product codes, proper nouns not in training data).\n\n\nSparse Vectors (BM25 / SPLADE)\nThe classic keyword search approach. Each dimension corresponds to a vocabulary term. Excellent at exact matching, terrible at synonyms and paraphrase.\n\n\nHybrid: Best of Both\nQdrant supports hybrid search natively using Reciprocal Rank Fusion (RRF) — run both retrievals, merge the ranked lists, take the top-k from the merged result.\nfrom qdrant_client.models import Prefetch, FusionQuery, Fusion, SparseVector\n\nresults = await client.query_points(\n    collection_name=\"my_docs\",\n    prefetch=[\n        Prefetch(query=dense_vector, using=\"dense\", limit=20),\n        Prefetch(query=SparseVector(indices=sparse_indices, values=sparse_values),\n                 using=\"sparse\", limit=20),\n    ],\n    query=FusionQuery(fusion=Fusion.RRF),\n    limit=5,\n    with_payload=True,\n)\nFor most production RAG systems, hybrid search improves recall by 10–20% over dense-only, especially on domain-specific or technical content."
+  },
+  {
+    "objectID": "posts/vector-databases/index.html#payload-filtering",
+    "href": "posts/vector-databases/index.html#payload-filtering",
+    "title": "Vector Databases Explained",
+    "section": "Payload Filtering",
+    "text": "Payload Filtering\nA vector database isn’t just for retrieval — you also need to filter by metadata. Qdrant stores arbitrary JSON payloads alongside vectors and can filter at query time without a post-processing step.\nfrom qdrant_client.models import Filter, FieldCondition, MatchValue\n\nresults = await client.query_points(\n    collection_name=\"my_docs\",\n    query=query_vector,\n    using=\"dense\",\n    query_filter=Filter(\n        must=[\n            FieldCondition(key=\"source\", match=MatchValue(value=\"technical_manual\")),\n            FieldCondition(key=\"year\", range={\"gte\": 2024}),\n        ]\n    ),\n    limit=5,\n)\nImportant: Create payload indexes for fields you filter on. Without an index, Qdrant scans the full payload for every candidate — that erases the ANN speed advantage.\nawait client.create_payload_index(\n    collection_name=\"my_docs\",\n    field_name=\"source\",\n    field_schema=\"keyword\",\n)"
+  },
+  {
+    "objectID": "posts/vector-databases/index.html#choosing-a-vector-database",
+    "href": "posts/vector-databases/index.html#choosing-a-vector-database",
+    "title": "Vector Databases Explained",
+    "section": "Choosing a Vector Database",
+    "text": "Choosing a Vector Database\n\n\n\n\n\n\n\n\nDB\nBest For\nNotes\n\n\n\n\nQdrant\nProduction open-source\nRust core, excellent Python SDK, hybrid search built-in\n\n\nPinecone\nManaged cloud, fast setup\nExpensive at scale, less control\n\n\npgvector\nAlready on PostgreSQL\nHNSW support since 0.7.0, but slower than dedicated DBs\n\n\nWeaviate\nGraphQL API, multi-modal\nHeavier operationally\n\n\nChroma\nLocal dev and prototyping\nNot production-tested at scale\n\n\n\nFor most teams building RAG: Qdrant on Docker locally, Qdrant Cloud for production. The API is identical; you change one URL string."
+  },
+  {
+    "objectID": "posts/vector-databases/index.html#production-checklist",
+    "href": "posts/vector-databases/index.html#production-checklist",
+    "title": "Vector Databases Explained",
+    "section": "Production Checklist",
+    "text": "Production Checklist\n\nIndex built with ef_construct &gt;= 100; raise to 200 if recall is below expectations\nPayload indexes created for all filter fields\nCollection backed by persistent storage (not in-memory)\nAsync client (AsyncQdrantClient) for all FastAPI or async paths\nBatch upsert — don’t insert individual vectors in a loop\nCollection snapshots scheduled for backup\n\nA vector database is infrastructure. Get it right once, and it runs quietly for years. Get it wrong — missing indexes, sync client in async code, no backups — and you’ll feel it in production."
+  },
+  {
+    "objectID": "posts/intro-to-rag/index.html",
+    "href": "posts/intro-to-rag/index.html",
+    "title": "Building Your First RAG Pipeline",
+    "section": "",
+    "text": "Retrieval-Augmented Generation (RAG) is one of the most practical ways to make a large language model useful on your own data. The core idea is simple: before you ask the LLM a question, retrieve relevant documents from your own store and inject them into the prompt. The model answers from the retrieved context, not from memorized training data."
+  },
+  {
+    "objectID": "posts/intro-to-rag/index.html#why-rag-and-not-fine-tuning",
+    "href": "posts/intro-to-rag/index.html#why-rag-and-not-fine-tuning",
+    "title": "Building Your First RAG Pipeline",
+    "section": "Why RAG and Not Fine-Tuning?",
+    "text": "Why RAG and Not Fine-Tuning?\nFine-tuning is expensive, slow, and requires retraining whenever your data changes. RAG lets you update the knowledge base (your vector store) without touching the model. For most enterprise use cases — internal docs, customer support, code search — RAG wins on cost and iteration speed."
+  },
+  {
+    "objectID": "posts/intro-to-rag/index.html#the-four-stage-pipeline",
+    "href": "posts/intro-to-rag/index.html#the-four-stage-pipeline",
+    "title": "Building Your First RAG Pipeline",
+    "section": "The Four-Stage Pipeline",
+    "text": "The Four-Stage Pipeline\nA minimal RAG system has four stages:\nSource Documents → Chunker → Embedder → Vector Store\n                                              ↑\n                                         Query Time:\n                                         Query → Embed → Retrieve → LLM → Answer\n\nStage 1: Chunking\nLong documents don’t fit in a single embedding or a single prompt. Split them into overlapping chunks so context is preserved across boundaries.\nfrom langchain.text_splitter import RecursiveCharacterTextSplitter\n\nsplitter = RecursiveCharacterTextSplitter(\n    chunk_size=512,\n    chunk_overlap=50,\n    separators=[\"\\n\\n\", \"\\n\", \". \", \" \"],\n)\nchunks = splitter.split_text(document_text)\nTip: Use chunk_overlap=50 as a baseline. For technical docs with dense references, go higher (100–150).\n\n\nStage 2: Embedding\nConvert each chunk into a dense vector. OpenAI’s text-embedding-3-large with 3072 dimensions gives state-of-the-art retrieval quality.\nfrom openai import AsyncOpenAI\n\nclient = AsyncOpenAI()\n\nasync def embed(texts: list[str]) -&gt; list[list[float]]:\n    response = await client.embeddings.create(\n        model=\"text-embedding-3-large\",\n        input=texts,\n        dimensions=3072,\n    )\n    return [item.embedding for item in response.data]\n\n\nStage 3: Storing in a Vector Database\nQdrant is a fast, production-ready vector database with first-class Python support.\nfrom qdrant_client import AsyncQdrantClient, models\n\nclient = AsyncQdrantClient(url=\"http://localhost:6333\")\n\nawait client.upsert(\n    collection_name=\"my_docs\",\n    points=[\n        models.PointStruct(\n            id=i,\n            vector={\"dense\": embedding},\n            payload={\"text\": chunk, \"source\": filename},\n        )\n        for i, (chunk, embedding) in enumerate(zip(chunks, embeddings))\n    ],\n)\n\n\nStage 4: Retrieval and Generation\nAt query time, embed the question, retrieve the top-k chunks, build a prompt, and call the LLM.\nfrom openai import AsyncOpenAI\n\nasync def answer(question: str, top_k: int = 5) -&gt; str:\n    q_vec = (await embed([question]))[0]\n\n    results = await qdrant.query_points(\n        collection_name=\"my_docs\",\n        query=q_vec,\n        using=\"dense\",\n        limit=top_k,\n        with_payload=True,\n    )\n\n    context = \"\\n\\n\".join(r.payload[\"text\"] for r in results.points)\n\n    response = await openai_client.chat.completions.create(\n        model=\"gpt-4o\",\n        messages=[\n            {\"role\": \"system\", \"content\": \"Answer using only the provided context. If unsure, say so.\"},\n            {\"role\": \"user\", \"content\": f\"Context:\\n{context}\\n\\nQuestion: {question}\"},\n        ],\n        temperature=0.0,\n    )\n    return response.choices[0].message.content"
+  },
+  {
+    "objectID": "posts/intro-to-rag/index.html#common-failure-modes",
+    "href": "posts/intro-to-rag/index.html#common-failure-modes",
+    "title": "Building Your First RAG Pipeline",
+    "section": "Common Failure Modes",
+    "text": "Common Failure Modes\n\n\n\n\n\n\n\n\nProblem\nCause\nFix\n\n\n\n\nLow recall\nChunks too large\nReduce chunk size to 256–512 tokens\n\n\nHallucinations\nContext not injected correctly\nLog the prompt, verify context is present\n\n\nSlow ingest\nEmbedding one-at-a-time\nBatch embed 100 chunks per API call\n\n\nStale answers\nVector store not updated\nBuild an incremental update pipeline"
+  },
+  {
+    "objectID": "posts/intro-to-rag/index.html#whats-next",
+    "href": "posts/intro-to-rag/index.html#whats-next",
+    "title": "Building Your First RAG Pipeline",
+    "section": "What’s Next",
+    "text": "What’s Next\nOnce you have a working pipeline, the next steps are:\n\nHybrid search — combine dense vectors with BM25 keyword search for better recall on technical terms\nReranking — use a cross-encoder to reorder retrieved chunks before passing to the LLM\nEvaluation — measure answer quality with RAGAS (faithfulness, context_recall, answer_relevancy)\n\nRAG is not magic. A well-chunked, well-indexed knowledge base paired with a tight prompt is what makes the difference between a demo and a production system."
+  },
+  {
+    "objectID": "about.html",
+    "href": "about.html",
+    "title": "About",
+    "section": "",
+    "text": "I’m Sourangshu Pal — an engineer and researcher working at the intersection of AI systems, machine learning, and software engineering.\nThis blog is where I write about building production AI systems: retrieval-augmented generation pipelines, LLM application architecture, vector search infrastructure, and the practical details that textbooks skip over.\nI focus on what actually works in production — not toy examples, but real systems with real failure modes.\nTopics I write about:\n\nRetrieval-Augmented Generation (RAG) and semantic search\nLLM application design and prompt engineering\nVector databases and ANN algorithms\nML system evaluation and observability\nPython, async patterns, and API design\n\n\nIf you find something useful here, reach out on GitHub or LinkedIn."
   }
 ]

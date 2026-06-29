@@ -1,0 +1,123 @@
+---
+title: "LLM Fundamentals Every Engineer Should Know"
+date: "2025-12-05"
+categories: [LLM, ML, Fundamentals]
+description: "The concepts under the hood you need before building production AI systems — tokens, context windows, temperature, and the things nobody tells you."
+author: "Sourangshu Pal"
+---
+
+Building on top of large language models is mostly an API integration problem. But when things break — and they will — you need to know what's actually happening inside. This post covers the concepts that matter most for engineers working with LLMs in production.
+
+## Tokens, Not Words
+
+LLMs don't see words. They see *tokens* — subword units produced by a byte-pair encoding (BPE) tokenizer. The rule of thumb: 1 token ≈ 0.75 English words, or ~4 characters.
+
+This matters for three reasons:
+
+- **Cost**: pricing is per-token, not per-word
+- **Limits**: context windows are measured in tokens
+- **Surprises**: `"unhelpful"` might be 1 token while `"xyyzz4928"` might be 5
+
+```python
+import tiktoken
+
+enc = tiktoken.encoding_for_model("gpt-4o")
+tokens = enc.encode("The transformer architecture scales remarkably well.")
+print(len(tokens))  # 9
+```
+
+Always count tokens before sending to the API — a request that exceeds the context window throws a hard error.
+
+## Context Windows
+
+The context window is the total number of tokens the model can "see" at once — input plus output combined. GPT-4o supports 128k tokens. This is large enough that most applications fit comfortably, but naive approaches still hit limits:
+
+- System prompt: ~500 tokens
+- Retrieved context (RAG): 5 chunks × 512 tokens = 2,560 tokens
+- Conversation history: grows without bound if you don't truncate
+
+**The practical rule:** reserve at least 4k tokens for the model's output. Everything else is input budget.
+
+## Temperature and Sampling
+
+Temperature controls how "creative" the model is. Technically, it scales the logit distribution before softmax — higher values flatten the distribution (more randomness), lower values sharpen it (more deterministic).
+
+| Temperature | Use Case |
+|---|---|
+| `0.0` | Fact extraction, classification, structured output |
+| `0.3–0.5` | Summarization, Q&A systems |
+| `0.7–1.0` | Creative writing, brainstorming |
+| `>1.0` | Rarely useful in production |
+
+For RAG and data pipelines, always use `temperature=0.0`. You want reproducible, factual answers — not creative ones.
+
+## System Prompts Are Load-Bearing
+
+The system prompt shapes everything. A weak system prompt is the most common reason a "good model" gives bad results. Key principles:
+
+- Be explicit about what the model should and should not do
+- State the output format, not just the task
+- Include examples (few-shot) for complex or unusual tasks
+- Test it: prompt injection is real, and adversarial users will try to override it
+
+```python
+SYSTEM = """You are a technical support assistant.
+Answer only questions about our product.
+If the question is off-topic, say: "I can only answer questions about Product X."
+Always respond in plain English, no markdown.
+"""
+```
+
+## Hallucinations Are a Probability Problem
+
+LLMs are not search engines. They predict the next probable token. When the model doesn't "know" something, it produces plausible-sounding output — which is a hallucination.
+
+Mitigation strategies ranked by effectiveness:
+
+1. **RAG** — ground answers in retrieved documents, include the source
+2. **Self-consistency** — sample the same question 3× at `temperature=0.7`, return the majority answer
+3. **Structured output** — force the model to output JSON with a `"confidence"` field; set a threshold
+4. **Verification prompts** — ask the model "Is the answer above supported by the context?" as a second call
+
+None of these eliminate hallucinations. They reduce them.
+
+## The Real Cost of Long Context
+
+128k token context windows are impressive, but "lost in the middle" is a real phenomenon: LLMs attend more strongly to content at the beginning and end of the context window. Content buried in the middle gets underweighted.
+
+Practical consequences:
+
+- Put the most important instructions at the **top** of the system prompt
+- In RAG, put the highest-ranked chunk **first** in the context block
+- Don't assume adding more context always improves quality — sometimes it degrades it
+
+## Structured Outputs
+
+Modern OpenAI models support JSON mode and structured outputs via response schemas. Use these whenever you need machine-readable responses.
+
+```python
+from pydantic import BaseModel
+from openai import AsyncOpenAI
+
+class AnalysisResult(BaseModel):
+    sentiment: str
+    confidence: float
+    summary: str
+
+client = AsyncOpenAI()
+
+response = await client.beta.chat.completions.parse(
+    model="gpt-4o",
+    messages=[{"role": "user", "content": "Analyze: 'The product is excellent but shipping was slow.'"}],
+    response_format=AnalysisResult,
+)
+result = response.choices[0].message.parsed  # typed AnalysisResult object
+```
+
+This is more reliable than asking the model to "respond in JSON" and then parsing the output yourself.
+
+## Prompt Caching
+
+If your system prompt is large and repeated across many calls, OpenAI's prompt caching reduces latency and cost. Cached input tokens cost 50% less. The cache key is based on the exact prefix — so keep your system prompt stable and put dynamic content at the end.
+
+Understanding these fundamentals turns debugging from guesswork into diagnosis. When an LLM application fails, the root cause is almost always one of: token budget exceeded, temperature too high for a deterministic task, system prompt underspecified, or context not properly injected.

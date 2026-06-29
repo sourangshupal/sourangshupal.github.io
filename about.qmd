@@ -4,16 +4,28 @@ image: profile.jpg
 about:
   template: jolla
   links:
-    - icon: twitter
-      text: Twitter
-      href: https://twitter.com
+    - icon: github
+      text: GitHub
+      href: https://github.com/sourangshupal
     - icon: linkedin
       text: LinkedIn
-      href: https://linkedin.com
-    - icon: github
-      text: Github
-      href: https://github.com
+      href: https://linkedin.com/in/sourangshupal
+---
+
+I'm Sourangshu Pal — an engineer and researcher working at the intersection of AI systems, machine learning, and software engineering.
+
+This blog is where I write about building production AI systems: retrieval-augmented generation pipelines, LLM application architecture, vector search infrastructure, and the practical details that textbooks skip over.
+
+I focus on what actually works in production — not toy examples, but real systems with real failure modes.
+
+**Topics I write about:**
+
+- Retrieval-Augmented Generation (RAG) and semantic search
+- LLM application design and prompt engineering
+- Vector databases and ANN algorithms
+- ML system evaluation and observability
+- Python, async patterns, and API design
 
 ---
 
-About this blog
+*If you find something useful here, reach out on [GitHub](https://github.com/sourangshupal) or [LinkedIn](https://linkedin.com/in/sourangshupal).*

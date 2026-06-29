@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>About – Sourangshu Pal</title>
+<title>Posts – Sourangshu Pal</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -33,10 +33,13 @@ ul.task-list li input[type="checkbox"] {
 <script src="site_libs/quarto-search/fuse.min.js"></script>
 <script src="site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="./">
+<script src="site_libs/quarto-listing/list.min.js"></script>
+<script src="site_libs/quarto-listing/quarto-listing.js"></script>
 <script src="site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
 <link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-d0ae9245876894da5ac7e18953ecc5cc.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
@@ -69,16 +72,74 @@ ul.task-list li input[type="checkbox"] {
     "search-label": "Search"
   }
 }</script>
+<script>
+
+  window.document.addEventListener("DOMContentLoaded", function (_event) {
+    const listingTargetEl = window.document.querySelector('#listing-listing .list');
+    if (!listingTargetEl) {
+      // No listing discovered, do not attach.
+      return; 
+    }
+
+    const options = {
+      valueNames: ['listing-date','listing-title','listing-author','listing-image','listing-description','listing-categories',{ data: ['index'] },{ data: ['categories'] },{ data: ['listing-date-sort'] },{ data: ['listing-file-modified-sort'] }],
+      
+      searchColumns: ["listing-date","listing-title","listing-author","listing-image","listing-description","listing-categories"],
+    };
+
+    window['quarto-listings'] = window['quarto-listings'] || {};
+    window['quarto-listings']['listing-listing'] = new List('listing-listing', options);
+
+    if (window['quarto-listing-loaded']) {
+      window['quarto-listing-loaded']();
+    }
+  });
+
+  window.addEventListener('hashchange',() => {
+    if (window['quarto-listing-loaded']) {
+      window['quarto-listing-loaded']();
+    }
+  })
+  </script>
 <style>html{ scroll-behavior: smooth; }</style>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="styles.css">
-</head>
+<link rel="alternate" type="application/rss+xml" title="Sourangshu Pal" href="posts.xml" data-external="1"></head>
 
-<body class="nav-fixed fullcontent quarto-light">
+<body class="nav-fixed quarto-light">
 
 <div id="quarto-search-results"></div>
-  <header id="quarto-header" class="headroom fixed-top">
+  <header id="quarto-header" class="headroom fixed-top quarto-banner">
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
@@ -97,11 +158,11 @@ ul.task-list li input[type="checkbox"] {
 <span class="menu-text">Home</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="./posts.html"> 
+    <a class="nav-link active" href="./posts.html" aria-current="page"> 
 <span class="menu-text">Posts</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link active" href="./about.html" aria-current="page"> 
+    <a class="nav-link" href="./about.html"> 
 <span class="menu-text">About</span></a>
   </li>  
 </ul>
@@ -119,52 +180,159 @@ ul.task-list li input[type="checkbox"] {
     </nav>
 </header>
 <!-- content -->
-<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-page-left">
+      <h1 class="title">Posts</h1>
+                      </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta column-page-left">
+
+      
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        
+    <h5 class="quarto-listing-category-title">Categories</h5><div class="quarto-listing-category category-default"><div class="category" data-category="">All <span class="quarto-category-count">(3)</span></div><div class="category" data-category="RnVuZGFtZW50YWxz">Fundamentals <span class="quarto-category-count">(1)</span></div><div class="category" data-category="SW5mcmFzdHJ1Y3R1cmU=">Infrastructure <span class="quarto-category-count">(1)</span></div><div class="category" data-category="TExN">LLM <span class="quarto-category-count">(2)</span></div><div class="category" data-category="TUw=">ML <span class="quarto-category-count">(1)</span></div><div class="category" data-category="UHl0aG9u">Python <span class="quarto-category-count">(1)</span></div><div class="category" data-category="UWRyYW50">Qdrant <span class="quarto-category-count">(1)</span></div><div class="category" data-category="UkFH">RAG <span class="quarto-category-count">(1)</span></div><div class="category" data-category="U2VhcmNo">Search <span class="quarto-category-count">(1)</span></div><div class="category" data-category="VHV0b3JpYWw=">Tutorial <span class="quarto-category-count">(1)</span></div><div class="category" data-category="VmVjdG9yJTIwREI=">Vector DB <span class="quarto-category-count">(1)</span></div></div></div>
 <!-- main -->
-<div class="quarto-about-jolla">
-  <img src="profile.jpg" class="about-image
-  round " style="height: 15em; width: 15em;">
- <header id="title-block-header" class="quarto-title-block default">
-<div class="quarto-title">
-<h1 class="title">About</h1>
-</div>
-<div class="quarto-title-meta">
-  </div>
-</header><main class="content" id="quarto-document-content">
-<p>I’m Sourangshu Pal — an engineer and researcher working at the intersection of AI systems, machine learning, and software engineering.</p>
-<p>This blog is where I write about building production AI systems: retrieval-augmented generation pipelines, LLM application architecture, vector search infrastructure, and the practical details that textbooks skip over.</p>
-<p>I focus on what actually works in production — not toy examples, but real systems with real failure modes.</p>
-<p><strong>Topics I write about:</strong></p>
-<ul>
-<li>Retrieval-Augmented Generation (RAG) and semantic search</li>
-<li>LLM application design and prompt engineering</li>
-<li>Vector databases and ANN algorithms</li>
-<li>ML system evaluation and observability</li>
-<li>Python, async patterns, and API design</li>
-</ul>
-<hr>
-<p><em>If you find something useful here, reach out on <a href="https://github.com/sourangshupal">GitHub</a> or <a href="https://linkedin.com/in/sourangshupal">LinkedIn</a>.</em></p>
+<main class="content quarto-banner-title-block column-page-left" id="quarto-document-content">
 
 
-</main> 
-  <hr class="about-sep">
-   <div class="about-links">
-  <a href="https://github.com/sourangshupal" class="about-link" rel="" target="">
-    <i class="bi bi-github"></i>
-     <span class="about-link-text">GitHub</span>
-  </a>
-  <a href="https://linkedin.com/in/sourangshupal" class="about-link" rel="" target="">
-    <i class="bi bi-linkedin"></i>
-     <span class="about-link-text">LinkedIn</span>
-  </a>
+
+
+
+
+
+
+
+<div class="quarto-listing quarto-listing-container-default" id="listing-listing">
+<div class="list quarto-listing-default">
+<div class="quarto-post image-right" data-index="0" data-categories="UkFHJTJDTExNJTJDUHl0aG9uJTJDVHV0b3JpYWw=" data-listing-date-sort="1765305000000" data-listing-file-modified-sort="1782737374768" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="5" data-listing-word-count-sort="828">
+<div class="thumbnail"><a href="./posts/intro-to-rag/index.html" class="no-external">
+
+<img loading="lazy" src="./posts/intro-to-rag/rag-pipeline.png" class="thumbnail-image">
+
+</a></div>
+<div class="body">
+<h3 class="no-anchor listing-title">
+<a href="./posts/intro-to-rag/index.html" class="no-external">Building Your First RAG Pipeline</a>
+</h3>
+<div class="listing-categories">
+
+<div class="listing-category" onclick="window.quartoListingCategory('UkFH'); return false;">RAG</div>
+
+<div class="listing-category" onclick="window.quartoListingCategory('TExN'); return false;">LLM</div>
+
+<div class="listing-category" onclick="window.quartoListingCategory('UHl0aG9u'); return false;">Python</div>
+
+<div class="listing-category" onclick="window.quartoListingCategory('VHV0b3JpYWw='); return false;">Tutorial</div>
+
+</div>
+<div class="delink listing-description"><a href="./posts/intro-to-rag/index.html" class="no-external">
+<p>A practical walkthrough of Retrieval-Augmented Generation — from chunking documents to serving answers — with working Python code.</p>
+</a></div>
+</div>
+<div class="metadata">
+<a href="./posts/intro-to-rag/index.html" class="no-external">
+<div class="listing-date">
+Dec 10, 2025
+</div>
+<div class="listing-author">
+Sourangshu Pal
+</div>
+</a>
 </div>
 </div>
- <!-- /main -->
+<div class="quarto-post image-right" data-index="1" data-categories="TExNJTJDTUwlMkNGdW5kYW1lbnRhbHM=" data-listing-date-sort="1764873000000" data-listing-file-modified-sort="1782737407471" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="4" data-listing-word-count-sort="748">
+<div class="thumbnail"><a href="./posts/llm-fundamentals/index.html" class="no-external">
+
+<div class="listing-item-img-placeholder card-img-top" >&nbsp;</div>
+
+</a></div>
+<div class="body">
+<h3 class="no-anchor listing-title">
+<a href="./posts/llm-fundamentals/index.html" class="no-external">LLM Fundamentals Every Engineer Should Know</a>
+</h3>
+<div class="listing-categories">
+
+<div class="listing-category" onclick="window.quartoListingCategory('TExN'); return false;">LLM</div>
+
+<div class="listing-category" onclick="window.quartoListingCategory('TUw='); return false;">ML</div>
+
+<div class="listing-category" onclick="window.quartoListingCategory('RnVuZGFtZW50YWxz'); return false;">Fundamentals</div>
+
+</div>
+<div class="delink listing-description"><a href="./posts/llm-fundamentals/index.html" class="no-external">
+<p>The concepts under the hood you need before building production AI systems — tokens, context windows, temperature, and the things nobody tells you.</p>
+</a></div>
+</div>
+<div class="metadata">
+<a href="./posts/llm-fundamentals/index.html" class="no-external">
+<div class="listing-date">
+Dec 5, 2025
+</div>
+<div class="listing-author">
+Sourangshu Pal
+</div>
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="2" data-categories="VmVjdG9yJTIwREIlMkNRZHJhbnQlMkNTZWFyY2glMkNJbmZyYXN0cnVjdHVyZQ==" data-listing-date-sort="1764268200000" data-listing-file-modified-sort="1782737442392" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="5" data-listing-word-count-sort="939">
+<div class="thumbnail"><a href="./posts/vector-databases/index.html" class="no-external">
+
+<div class="listing-item-img-placeholder card-img-top" >&nbsp;</div>
+
+</a></div>
+<div class="body">
+<h3 class="no-anchor listing-title">
+<a href="./posts/vector-databases/index.html" class="no-external">Vector Databases Explained</a>
+</h3>
+<div class="listing-categories">
+
+<div class="listing-category" onclick="window.quartoListingCategory('VmVjdG9yJTIwREI='); return false;">Vector DB</div>
+
+<div class="listing-category" onclick="window.quartoListingCategory('UWRyYW50'); return false;">Qdrant</div>
+
+<div class="listing-category" onclick="window.quartoListingCategory('U2VhcmNo'); return false;">Search</div>
+
+<div class="listing-category" onclick="window.quartoListingCategory('SW5mcmFzdHJ1Y3R1cmU='); return false;">Infrastructure</div>
+
+</div>
+<div class="delink listing-description"><a href="./posts/vector-databases/index.html" class="no-external">
+<p>What vector databases actually do, how approximate nearest neighbor search works, and how to choose and configure one for your AI application.</p>
+</a></div>
+</div>
+<div class="metadata">
+<a href="./posts/vector-databases/index.html" class="no-external">
+<div class="listing-date">
+Nov 28, 2025
+</div>
+<div class="listing-author">
+Sourangshu Pal
+</div>
+</a>
+</div>
+</div>
+</div>
+<div class="listing-no-matching d-none">No matching items</div>
+</div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
     const isCodeAnnotation = (el) => {
       for (const clz of el.classList) {
         if (clz.startsWith('code-annotation-')) {                     

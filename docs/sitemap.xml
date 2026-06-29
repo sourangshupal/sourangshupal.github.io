@@ -1,11 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://sourangshupal.github.io/about.html</loc>
-    <lastmod>2025-12-15T12:47:47.008Z</lastmod>
+    <loc>https://sourangshupal.github.io/posts.html</loc>
+    <lastmod>2026-06-29T12:48:58.491Z</lastmod>
   </url>
   <url>
     <loc>https://sourangshupal.github.io/index.html</loc>
-    <lastmod>2025-12-15T13:51:42.150Z</lastmod>
+    <lastmod>2026-06-29T12:51:16.698Z</lastmod>
+  </url>
+  <url>
+    <loc>https://sourangshupal.github.io/posts/llm-fundamentals/index.html</loc>
+    <lastmod>2026-06-29T12:50:07.471Z</lastmod>
+  </url>
+  <url>
+    <loc>https://sourangshupal.github.io/posts/vector-databases/index.html</loc>
+    <lastmod>2026-06-29T12:50:42.392Z</lastmod>
+  </url>
+  <url>
+    <loc>https://sourangshupal.github.io/posts/intro-to-rag/index.html</loc>
+    <lastmod>2026-06-29T12:49:34.768Z</lastmod>
+  </url>
+  <url>
+    <loc>https://sourangshupal.github.io/about.html</loc>
+    <lastmod>2026-06-29T12:51:09.576Z</lastmod>
   </url>
 </urlset>

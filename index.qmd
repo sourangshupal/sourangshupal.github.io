@@ -1,15 +1,17 @@
 ---
-title: "Welcome to My Blog"
-page-layout: article
-title-block-banner: true
+title: "Sourangshu Pal"
+page-layout: full
+title-block-banner: false
+listing:
+  contents: posts
+  sort: "date desc"
+  type: default
+  max-items: 6
+  categories: true
 ---
 
 ## AI, Machine Learning & Modern Tech
 
-Welcome to my blog where I share insights about artificial intelligence, machine learning, and practical applications of modern AI systems.
+Writing about production AI systems — RAG pipelines, LLMs, vector search, and the engineering details that matter.
 
-### Recent Posts
-
-Check out my latest articles on AI and machine learning below.
-
-
+---

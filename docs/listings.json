@@ -1,0 +1,18 @@
+[
+  {
+    "listing": "/posts.html",
+    "items": [
+      "/posts/intro-to-rag/index.html",
+      "/posts/llm-fundamentals/index.html",
+      "/posts/vector-databases/index.html"
+    ]
+  },
+  {
+    "listing": "/index.html",
+    "items": [
+      "/posts/intro-to-rag/index.html",
+      "/posts/llm-fundamentals/index.html",
+      "/posts/vector-databases/index.html"
+    ]
+  }
+]

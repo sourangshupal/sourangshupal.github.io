@@ -6,8 +6,11 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
+<meta name="author" content="Sourangshu Pal">
+<meta name="dcterms.date" content="2025-12-05">
+<meta name="description" content="The concepts under the hood you need before building production AI systems — tokens, context windows, temperature, and the things nobody tells you.">
 
-<title>About – Sourangshu Pal</title>
+<title>LLM Fundamentals Every Engineer Should Know – Sourangshu Pal</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -23,25 +26,61 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
-<script src="site_libs/quarto-nav/quarto-nav.js"></script>
-<script src="site_libs/quarto-nav/headroom.min.js"></script>
-<script src="site_libs/clipboard/clipboard.min.js"></script>
-<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
-<script src="site_libs/quarto-search/fuse.min.js"></script>
-<script src="site_libs/quarto-search/quarto-search.js"></script>
-<meta name="quarto:offset" content="./">
-<script src="site_libs/quarto-html/quarto.js" type="module"></script>
-<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
-<script src="site_libs/quarto-html/popper.min.js"></script>
-<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
-<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-d0ae9245876894da5ac7e18953ecc5cc.css" rel="stylesheet" id="quarto-text-highlighting-styles">
-<script src="site_libs/bootstrap/bootstrap.min.js"></script>
-<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-a75f33ae44ba8850baa9356ddc7899f2.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="dark">
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-dark-d0ae9245876894da5ac7e18953ecc5cc.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-a75f33ae44ba8850baa9356ddc7899f2.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="dark">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -72,17 +111,17 @@ ul.task-list li input[type="checkbox"] {
 <style>html{ scroll-behavior: smooth; }</style>
 
 
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="../../styles.css">
 </head>
 
-<body class="nav-fixed fullcontent quarto-light">
+<body class="nav-fixed quarto-light">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
-    <a class="navbar-brand" href="./index.html">
+    <a class="navbar-brand" href="../../index.html">
     <span class="navbar-title">Sourangshu Pal</span>
     </a>
   </div>
@@ -93,15 +132,15 @@ ul.task-list li input[type="checkbox"] {
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll me-auto">
   <li class="nav-item">
-    <a class="nav-link" href="./index.html"> 
+    <a class="nav-link" href="../../index.html"> 
 <span class="menu-text">Home</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="./posts.html"> 
+    <a class="nav-link" href="../../posts.html"> 
 <span class="menu-text">Posts</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link active" href="./about.html" aria-current="page"> 
+    <a class="nav-link" href="../../about.html"> 
 <span class="menu-text">About</span></a>
   </li>  
 </ul>
@@ -122,49 +161,200 @@ ul.task-list li input[type="checkbox"] {
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#tokens-not-words" id="toc-tokens-not-words" class="nav-link active" data-scroll-target="#tokens-not-words">Tokens, Not Words</a></li>
+  <li><a href="#context-windows" id="toc-context-windows" class="nav-link" data-scroll-target="#context-windows">Context Windows</a></li>
+  <li><a href="#temperature-and-sampling" id="toc-temperature-and-sampling" class="nav-link" data-scroll-target="#temperature-and-sampling">Temperature and Sampling</a></li>
+  <li><a href="#system-prompts-are-load-bearing" id="toc-system-prompts-are-load-bearing" class="nav-link" data-scroll-target="#system-prompts-are-load-bearing">System Prompts Are Load-Bearing</a></li>
+  <li><a href="#hallucinations-are-a-probability-problem" id="toc-hallucinations-are-a-probability-problem" class="nav-link" data-scroll-target="#hallucinations-are-a-probability-problem">Hallucinations Are a Probability Problem</a></li>
+  <li><a href="#the-real-cost-of-long-context" id="toc-the-real-cost-of-long-context" class="nav-link" data-scroll-target="#the-real-cost-of-long-context">The Real Cost of Long Context</a></li>
+  <li><a href="#structured-outputs" id="toc-structured-outputs" class="nav-link" data-scroll-target="#structured-outputs">Structured Outputs</a></li>
+  <li><a href="#prompt-caching" id="toc-prompt-caching" class="nav-link" data-scroll-target="#prompt-caching">Prompt Caching</a></li>
+  </ul>
+</nav>
+    </div>
 <!-- main -->
-<div class="quarto-about-jolla">
-  <img src="profile.jpg" class="about-image
-  round " style="height: 15em; width: 15em;">
- <header id="title-block-header" class="quarto-title-block default">
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">About</h1>
-</div>
-<div class="quarto-title-meta">
+<h1 class="title">LLM Fundamentals Every Engineer Should Know</h1>
+  <div class="quarto-categories">
+    <div class="quarto-category">LLM</div>
+    <div class="quarto-category">ML</div>
+    <div class="quarto-category">Fundamentals</div>
   </div>
-</header><main class="content" id="quarto-document-content">
-<p>I’m Sourangshu Pal — an engineer and researcher working at the intersection of AI systems, machine learning, and software engineering.</p>
-<p>This blog is where I write about building production AI systems: retrieval-augmented generation pipelines, LLM application architecture, vector search infrastructure, and the practical details that textbooks skip over.</p>
-<p>I focus on what actually works in production — not toy examples, but real systems with real failure modes.</p>
-<p><strong>Topics I write about:</strong></p>
+  </div>
+
+<div>
+  <div class="description">
+    The concepts under the hood you need before building production AI systems — tokens, context windows, temperature, and the things nobody tells you.
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Sourangshu Pal </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">December 5, 2025</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>Building on top of large language models is mostly an API integration problem. But when things break — and they will — you need to know what’s actually happening inside. This post covers the concepts that matter most for engineers working with LLMs in production.</p>
+<section id="tokens-not-words" class="level2">
+<h2 class="anchored" data-anchor-id="tokens-not-words">Tokens, Not Words</h2>
+<p>LLMs don’t see words. They see <em>tokens</em> — subword units produced by a byte-pair encoding (BPE) tokenizer. The rule of thumb: 1 token ≈ 0.75 English words, or ~4 characters.</p>
+<p>This matters for three reasons:</p>
 <ul>
-<li>Retrieval-Augmented Generation (RAG) and semantic search</li>
-<li>LLM application design and prompt engineering</li>
-<li>Vector databases and ANN algorithms</li>
-<li>ML system evaluation and observability</li>
-<li>Python, async patterns, and API design</li>
+<li><strong>Cost</strong>: pricing is per-token, not per-word</li>
+<li><strong>Limits</strong>: context windows are measured in tokens</li>
+<li><strong>Surprises</strong>: <code>"unhelpful"</code> might be 1 token while <code>"xyyzz4928"</code> might be 5</li>
 </ul>
-<hr>
-<p><em>If you find something useful here, reach out on <a href="https://github.com/sourangshupal">GitHub</a> or <a href="https://linkedin.com/in/sourangshupal">LinkedIn</a>.</em></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> tiktoken</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>enc <span class="op">=</span> tiktoken.encoding_for_model(<span class="st">"gpt-4o"</span>)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>tokens <span class="op">=</span> enc.encode(<span class="st">"The transformer architecture scales remarkably well."</span>)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="bu">len</span>(tokens))  <span class="co"># 9</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Always count tokens before sending to the API — a request that exceeds the context window throws a hard error.</p>
+</section>
+<section id="context-windows" class="level2">
+<h2 class="anchored" data-anchor-id="context-windows">Context Windows</h2>
+<p>The context window is the total number of tokens the model can “see” at once — input plus output combined. GPT-4o supports 128k tokens. This is large enough that most applications fit comfortably, but naive approaches still hit limits:</p>
+<ul>
+<li>System prompt: ~500 tokens</li>
+<li>Retrieved context (RAG): 5 chunks × 512 tokens = 2,560 tokens</li>
+<li>Conversation history: grows without bound if you don’t truncate</li>
+</ul>
+<p><strong>The practical rule:</strong> reserve at least 4k tokens for the model’s output. Everything else is input budget.</p>
+</section>
+<section id="temperature-and-sampling" class="level2">
+<h2 class="anchored" data-anchor-id="temperature-and-sampling">Temperature and Sampling</h2>
+<p>Temperature controls how “creative” the model is. Technically, it scales the logit distribution before softmax — higher values flatten the distribution (more randomness), lower values sharpen it (more deterministic).</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Temperature</th>
+<th>Use Case</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>0.0</code></td>
+<td>Fact extraction, classification, structured output</td>
+</tr>
+<tr class="even">
+<td><code>0.3–0.5</code></td>
+<td>Summarization, Q&amp;A systems</td>
+</tr>
+<tr class="odd">
+<td><code>0.7–1.0</code></td>
+<td>Creative writing, brainstorming</td>
+</tr>
+<tr class="even">
+<td><code>&gt;1.0</code></td>
+<td>Rarely useful in production</td>
+</tr>
+</tbody>
+</table>
+<p>For RAG and data pipelines, always use <code>temperature=0.0</code>. You want reproducible, factual answers — not creative ones.</p>
+</section>
+<section id="system-prompts-are-load-bearing" class="level2">
+<h2 class="anchored" data-anchor-id="system-prompts-are-load-bearing">System Prompts Are Load-Bearing</h2>
+<p>The system prompt shapes everything. A weak system prompt is the most common reason a “good model” gives bad results. Key principles:</p>
+<ul>
+<li>Be explicit about what the model should and should not do</li>
+<li>State the output format, not just the task</li>
+<li>Include examples (few-shot) for complex or unusual tasks</li>
+<li>Test it: prompt injection is real, and adversarial users will try to override it</li>
+</ul>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>SYSTEM <span class="op">=</span> <span class="st">"""You are a technical support assistant.</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="st">Answer only questions about our product.</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="st">If the question is off-topic, say: "I can only answer questions about Product X."</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="st">Always respond in plain English, no markdown.</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="st">"""</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="hallucinations-are-a-probability-problem" class="level2">
+<h2 class="anchored" data-anchor-id="hallucinations-are-a-probability-problem">Hallucinations Are a Probability Problem</h2>
+<p>LLMs are not search engines. They predict the next probable token. When the model doesn’t “know” something, it produces plausible-sounding output — which is a hallucination.</p>
+<p>Mitigation strategies ranked by effectiveness:</p>
+<ol type="1">
+<li><strong>RAG</strong> — ground answers in retrieved documents, include the source</li>
+<li><strong>Self-consistency</strong> — sample the same question 3× at <code>temperature=0.7</code>, return the majority answer</li>
+<li><strong>Structured output</strong> — force the model to output JSON with a <code>"confidence"</code> field; set a threshold</li>
+<li><strong>Verification prompts</strong> — ask the model “Is the answer above supported by the context?” as a second call</li>
+</ol>
+<p>None of these eliminate hallucinations. They reduce them.</p>
+</section>
+<section id="the-real-cost-of-long-context" class="level2">
+<h2 class="anchored" data-anchor-id="the-real-cost-of-long-context">The Real Cost of Long Context</h2>
+<p>128k token context windows are impressive, but “lost in the middle” is a real phenomenon: LLMs attend more strongly to content at the beginning and end of the context window. Content buried in the middle gets underweighted.</p>
+<p>Practical consequences:</p>
+<ul>
+<li>Put the most important instructions at the <strong>top</strong> of the system prompt</li>
+<li>In RAG, put the highest-ranked chunk <strong>first</strong> in the context block</li>
+<li>Don’t assume adding more context always improves quality — sometimes it degrades it</li>
+</ul>
+</section>
+<section id="structured-outputs" class="level2">
+<h2 class="anchored" data-anchor-id="structured-outputs">Structured Outputs</h2>
+<p>Modern OpenAI models support JSON mode and structured outputs via response schemas. Use these whenever you need machine-readable responses.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pydantic <span class="im">import</span> BaseModel</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> openai <span class="im">import</span> AsyncOpenAI</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> AnalysisResult(BaseModel):</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    sentiment: <span class="bu">str</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    confidence: <span class="bu">float</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    summary: <span class="bu">str</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>client <span class="op">=</span> AsyncOpenAI()</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>response <span class="op">=</span> <span class="cf">await</span> client.beta.chat.completions.parse(</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    model<span class="op">=</span><span class="st">"gpt-4o"</span>,</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>    messages<span class="op">=</span>[{<span class="st">"role"</span>: <span class="st">"user"</span>, <span class="st">"content"</span>: <span class="st">"Analyze: 'The product is excellent but shipping was slow.'"</span>}],</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>    response_format<span class="op">=</span>AnalysisResult,</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> response.choices[<span class="dv">0</span>].message.parsed  <span class="co"># typed AnalysisResult object</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>This is more reliable than asking the model to “respond in JSON” and then parsing the output yourself.</p>
+</section>
+<section id="prompt-caching" class="level2">
+<h2 class="anchored" data-anchor-id="prompt-caching">Prompt Caching</h2>
+<p>If your system prompt is large and repeated across many calls, OpenAI’s prompt caching reduces latency and cost. Cached input tokens cost 50% less. The cache key is based on the exact prefix — so keep your system prompt stable and put dynamic content at the end.</p>
+<p>Understanding these fundamentals turns debugging from guesswork into diagnosis. When an LLM application fails, the root cause is almost always one of: token budget exceeded, temperature too high for a deterministic task, system prompt underspecified, or context not properly injected.</p>
 
 
-</main> 
-  <hr class="about-sep">
-   <div class="about-links">
-  <a href="https://github.com/sourangshupal" class="about-link" rel="" target="">
-    <i class="bi bi-github"></i>
-     <span class="about-link-text">GitHub</span>
-  </a>
-  <a href="https://linkedin.com/in/sourangshupal" class="about-link" rel="" target="">
-    <i class="bi bi-linkedin"></i>
-     <span class="about-link-text">LinkedIn</span>
-  </a>
-</div>
-</div>
- <!-- /main -->
+</section>
+
+</main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
     const isCodeAnnotation = (el) => {
       for (const clz of el.classList) {
         if (clz.startsWith('code-annotation-')) {                     
@@ -586,5 +776,5 @@ ul.task-list li input[type="checkbox"] {
 
 
 
-<script src="site_libs/quarto-html/zenscroll-min.js"></script>
+<script src="../../site_libs/quarto-html/zenscroll-min.js"></script>
 </body></html>

@@ -11,21 +11,21 @@ website:
     left:
       - text: "Home"
         href: index.qmd
+      - text: "Posts"
+        href: posts.qmd
       - text: "About"
         href: about.qmd
     right:
       - icon: github
         href: https://github.com/sourangshupal
-      - icon: twitter
-        href: https://twitter.com
+        aria-label: GitHub
   page-footer:
     background: dark
     left: "© 2025 Sourangshu Pal"
     right:
       - icon: github
         href: https://github.com/sourangshupal
-      - icon: twitter
-        href: https://twitter.com
+        aria-label: GitHub
 
 format:
   html:
@@ -37,6 +37,3 @@ format:
     code-overflow: wrap
     smooth-scroll: true
     link-external-newwindow: true
-
-
-
