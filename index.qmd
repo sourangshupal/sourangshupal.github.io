@@ -1,19 +1,24 @@
 ---
 page-layout: full
 title-block-banner: false
+toc: false
 listing:
+  id: main-listing
   contents: posts
   sort: "date desc"
-  type: default
+  type: grid
+  grid-columns: 2
   max-items: 10
   categories: true
   feed: true
+  fields: [title, description, date, categories, reading-time]
 ---
 
-::: {style="padding: 3.5rem 0 1.5rem; max-width: 640px;"}
+::: {#hero}
 # Sourangshu Pal
 
-Writing about production AI systems — RAG pipelines, LLMs, vector search, and the engineering details that matter.
+Writing about production AI systems — RAG pipelines, LLMs, vector search, and the engineering that matters in practice.
 :::
 
----
+::: {#main-listing}
+:::
