@@ -1,17 +1,19 @@
 ---
-title: "Sourangshu Pal"
 page-layout: full
 title-block-banner: false
 listing:
   contents: posts
   sort: "date desc"
   type: default
-  max-items: 6
+  max-items: 10
   categories: true
+  feed: true
 ---
 
-## AI, Machine Learning & Modern Tech
+::: {style="padding: 3.5rem 0 1.5rem; max-width: 640px;"}
+# Sourangshu Pal
 
 Writing about production AI systems — RAG pipelines, LLMs, vector search, and the engineering details that matter.
+:::
 
 ---

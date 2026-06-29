@@ -11,14 +11,7 @@
     "href": "index.html",
     "title": "Sourangshu Pal",
     "section": "",
-    "text": "Writing about production AI systems — RAG pipelines, LLMs, vector search, and the engineering details that matter."
-  },
-  {
-    "objectID": "index.html#ai-machine-learning-modern-tech",
-    "href": "index.html#ai-machine-learning-modern-tech",
-    "title": "Sourangshu Pal",
-    "section": "",
-    "text": "Writing about production AI systems — RAG pipelines, LLMs, vector search, and the engineering details that matter."
+    "text": "Sourangshu Pal\nWriting about production AI systems — RAG pipelines, LLMs, vector search, and the engineering details that matter.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nBuilding Your First RAG Pipeline\n\n\n\nRAG\n\nLLM\n\nPython\n\nTutorial\n\n\n\nA practical walkthrough of Retrieval-Augmented Generation — from chunking documents to serving answers — with working Python code.\n\n\n\n\n\nDec 10, 2025\n\n\nSourangshu Pal\n\n\n\n\n\n\n\n\n\n\n\n\nLLM Fundamentals Every Engineer Should Know\n\n\n\nLLM\n\nML\n\nFundamentals\n\n\n\nThe concepts under the hood you need before building production AI systems — tokens, context windows, temperature, and the things nobody tells you.\n\n\n\n\n\nDec 5, 2025\n\n\nSourangshu Pal\n\n\n\n\n\n\n\n\n\n\n\n\nVector Databases Explained\n\n\n\nVector DB\n\nQdrant\n\nSearch\n\nInfrastructure\n\n\n\nWhat vector databases actually do, how approximate nearest neighbor search works, and how to choose and configure one for your AI application.\n\n\n\n\n\nNov 28, 2025\n\n\nSourangshu Pal\n\n\n\n\n\nNo matching items"
   },
   {
     "objectID": "posts/llm-fundamentals/index.html",

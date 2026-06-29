@@ -19,21 +19,27 @@ website:
       - icon: github
         href: https://github.com/sourangshupal
         aria-label: GitHub
+    search: true
   page-footer:
     background: dark
     left: "© 2025 Sourangshu Pal"
+    center: "AI, Machine Learning & Modern Tech"
     right:
       - icon: github
         href: https://github.com/sourangshupal
         aria-label: GitHub
+  open-graph: true
+  twitter-card: true
 
 format:
   html:
-    theme:
-      - darkly
+    theme: darkly
     css: styles.css
     toc: true
+    toc-depth: 3
     code-copy: true
     code-overflow: wrap
     smooth-scroll: true
     link-external-newwindow: true
+    link-external-icon: false
+    highlight-style: github-dark

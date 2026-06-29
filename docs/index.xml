@@ -1,0 +1,975 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss  xmlns:atom="http://www.w3.org/2005/Atom" 
+      xmlns:media="http://search.yahoo.com/mrss/" 
+      xmlns:content="http://purl.org/rss/1.0/modules/content/" 
+      xmlns:dc="http://purl.org/dc/elements/1.1/" 
+      version="2.0">
+<channel>
+<title>Sourangshu Pal</title>
+<link>https://sourangshupal.github.io/</link>
+<atom:link href="https://sourangshupal.github.io/index.xml" rel="self" type="application/rss+xml"/>
+<description>AI, Machine Learning, and Modern Tech Insights</description>
+<generator>quarto-1.9.37</generator>
+<lastBuildDate>Tue, 09 Dec 2025 18:30:00 GMT</lastBuildDate>
+<item>
+  <title>Building Your First RAG Pipeline</title>
+  <dc:creator>Sourangshu Pal</dc:creator>
+  <link>https://sourangshupal.github.io/posts/intro-to-rag/</link>
+  <description><![CDATA[ 
+
+
+
+
+<p>Retrieval-Augmented Generation (RAG) is one of the most practical ways to make a large language model useful on your own data. The core idea is simple: before you ask the LLM a question, retrieve relevant documents from your own store and inject them into the prompt. The model answers from the retrieved context, not from memorized training data.</p>
+<section id="why-rag-and-not-fine-tuning" class="level2">
+<h2 class="anchored" data-anchor-id="why-rag-and-not-fine-tuning">Why RAG and Not Fine-Tuning?</h2>
+<p>Fine-tuning is expensive, slow, and requires retraining whenever your data changes. RAG lets you update the knowledge base (your vector store) without touching the model. For most enterprise use cases — internal docs, customer support, code search — RAG wins on cost and iteration speed.</p>
+</section>
+<section id="the-four-stage-pipeline" class="level2">
+<h2 class="anchored" data-anchor-id="the-four-stage-pipeline">The Four-Stage Pipeline</h2>
+<p>A minimal RAG system has four stages:</p>
+<pre><code>Source Documents → Chunker → Embedder → Vector Store
+                                              ↑
+                                         Query Time:
+                                         Query → Embed → Retrieve → LLM → Answer</code></pre>
+<section id="stage-1-chunking" class="level3">
+<h3 class="anchored" data-anchor-id="stage-1-chunking">Stage 1: Chunking</h3>
+<p>Long documents don’t fit in a single embedding or a single prompt. Split them into overlapping chunks so context is preserved across boundaries.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">from</span> langchain.text_splitter <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> RecursiveCharacterTextSplitter</span>
+<span id="cb2-2"></span>
+<span id="cb2-3">splitter <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> RecursiveCharacterTextSplitter(</span>
+<span id="cb2-4">    chunk_size<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">512</span>,</span>
+<span id="cb2-5">    chunk_overlap<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">50</span>,</span>
+<span id="cb2-6">    separators<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>[<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span><span class="ch" style="color: #20794D;
+background-color: null;
+font-style: inherit;">\n\n</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span><span class="ch" style="color: #20794D;
+background-color: null;
+font-style: inherit;">\n</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">". "</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">" "</span>],</span>
+<span id="cb2-7">)</span>
+<span id="cb2-8">chunks <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> splitter.split_text(document_text)</span></code></pre></div></div>
+<p><strong>Tip:</strong> Use <code>chunk_overlap=50</code> as a baseline. For technical docs with dense references, go higher (100–150).</p>
+</section>
+<section id="stage-2-embedding" class="level3">
+<h3 class="anchored" data-anchor-id="stage-2-embedding">Stage 2: Embedding</h3>
+<p>Convert each chunk into a dense vector. OpenAI’s <code>text-embedding-3-large</code> with 3072 dimensions gives state-of-the-art retrieval quality.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">from</span> openai <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> AsyncOpenAI</span>
+<span id="cb3-2"></span>
+<span id="cb3-3">client <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> AsyncOpenAI()</span>
+<span id="cb3-4"></span>
+<span id="cb3-5"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">async</span> <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> embed(texts: <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">list</span>[<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">str</span>]) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-&gt;</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">list</span>[<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">list</span>[<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">float</span>]]:</span>
+<span id="cb3-6">    response <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">await</span> client.embeddings.create(</span>
+<span id="cb3-7">        model<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"text-embedding-3-large"</span>,</span>
+<span id="cb3-8">        <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">input</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>texts,</span>
+<span id="cb3-9">        dimensions<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">3072</span>,</span>
+<span id="cb3-10">    )</span>
+<span id="cb3-11">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span> [item.embedding <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> item <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> response.data]</span></code></pre></div></div>
+</section>
+<section id="stage-3-storing-in-a-vector-database" class="level3">
+<h3 class="anchored" data-anchor-id="stage-3-storing-in-a-vector-database">Stage 3: Storing in a Vector Database</h3>
+<p>Qdrant is a fast, production-ready vector database with first-class Python support.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">from</span> qdrant_client <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> AsyncQdrantClient, models</span>
+<span id="cb4-2"></span>
+<span id="cb4-3">client <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> AsyncQdrantClient(url<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"http://localhost:6333"</span>)</span>
+<span id="cb4-4"></span>
+<span id="cb4-5"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">await</span> client.upsert(</span>
+<span id="cb4-6">    collection_name<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"my_docs"</span>,</span>
+<span id="cb4-7">    points<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>[</span>
+<span id="cb4-8">        models.PointStruct(</span>
+<span id="cb4-9">            <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">id</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>i,</span>
+<span id="cb4-10">            vector<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>{<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"dense"</span>: embedding},</span>
+<span id="cb4-11">            payload<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>{<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"text"</span>: chunk, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"source"</span>: filename},</span>
+<span id="cb4-12">        )</span>
+<span id="cb4-13">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> i, (chunk, embedding) <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">enumerate</span>(<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">zip</span>(chunks, embeddings))</span>
+<span id="cb4-14">    ],</span>
+<span id="cb4-15">)</span></code></pre></div></div>
+</section>
+<section id="stage-4-retrieval-and-generation" class="level3">
+<h3 class="anchored" data-anchor-id="stage-4-retrieval-and-generation">Stage 4: Retrieval and Generation</h3>
+<p>At query time, embed the question, retrieve the top-k chunks, build a prompt, and call the LLM.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">from</span> openai <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> AsyncOpenAI</span>
+<span id="cb5-2"></span>
+<span id="cb5-3"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">async</span> <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> answer(question: <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">str</span>, top_k: <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">int</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">5</span>) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-&gt;</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">str</span>:</span>
+<span id="cb5-4">    q_vec <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> (<span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">await</span> embed([question]))[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>]</span>
+<span id="cb5-5"></span>
+<span id="cb5-6">    results <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">await</span> qdrant.query_points(</span>
+<span id="cb5-7">        collection_name<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"my_docs"</span>,</span>
+<span id="cb5-8">        query<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>q_vec,</span>
+<span id="cb5-9">        using<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"dense"</span>,</span>
+<span id="cb5-10">        limit<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>top_k,</span>
+<span id="cb5-11">        with_payload<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">True</span>,</span>
+<span id="cb5-12">    )</span>
+<span id="cb5-13"></span>
+<span id="cb5-14">    context <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span><span class="ch" style="color: #20794D;
+background-color: null;
+font-style: inherit;">\n\n</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>.join(r.payload[<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"text"</span>] <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> r <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> results.points)</span>
+<span id="cb5-15"></span>
+<span id="cb5-16">    response <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">await</span> openai_client.chat.completions.create(</span>
+<span id="cb5-17">        model<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"gpt-4o"</span>,</span>
+<span id="cb5-18">        messages<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>[</span>
+<span id="cb5-19">            {<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"role"</span>: <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"system"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"content"</span>: <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Answer using only the provided context. If unsure, say so."</span>},</span>
+<span id="cb5-20">            {<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"role"</span>: <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"user"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"content"</span>: <span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"Context:</span><span class="ch" style="color: #20794D;
+background-color: null;
+font-style: inherit;">\n</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>context<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span><span class="ch" style="color: #20794D;
+background-color: null;
+font-style: inherit;">\n\n</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">Question: </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>question<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>},</span>
+<span id="cb5-21">        ],</span>
+<span id="cb5-22">        temperature<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.0</span>,</span>
+<span id="cb5-23">    )</span>
+<span id="cb5-24">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span> response.choices[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>].message.content</span></code></pre></div></div>
+</section>
+</section>
+<section id="common-failure-modes" class="level2">
+<h2 class="anchored" data-anchor-id="common-failure-modes">Common Failure Modes</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Problem</th>
+<th>Cause</th>
+<th>Fix</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Low recall</td>
+<td>Chunks too large</td>
+<td>Reduce chunk size to 256–512 tokens</td>
+</tr>
+<tr class="even">
+<td>Hallucinations</td>
+<td>Context not injected correctly</td>
+<td>Log the prompt, verify context is present</td>
+</tr>
+<tr class="odd">
+<td>Slow ingest</td>
+<td>Embedding one-at-a-time</td>
+<td>Batch embed 100 chunks per API call</td>
+</tr>
+<tr class="even">
+<td>Stale answers</td>
+<td>Vector store not updated</td>
+<td>Build an incremental update pipeline</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="whats-next" class="level2">
+<h2 class="anchored" data-anchor-id="whats-next">What’s Next</h2>
+<p>Once you have a working pipeline, the next steps are:</p>
+<ol type="1">
+<li><strong>Hybrid search</strong> — combine dense vectors with BM25 keyword search for better recall on technical terms</li>
+<li><strong>Reranking</strong> — use a cross-encoder to reorder retrieved chunks before passing to the LLM</li>
+<li><strong>Evaluation</strong> — measure answer quality with RAGAS (<code>faithfulness</code>, <code>context_recall</code>, <code>answer_relevancy</code>)</li>
+</ol>
+<p>RAG is not magic. A well-chunked, well-indexed knowledge base paired with a tight prompt is what makes the difference between a demo and a production system.</p>
+
+
+</section>
+
+ ]]></description>
+  <category>RAG</category>
+  <category>LLM</category>
+  <category>Python</category>
+  <category>Tutorial</category>
+  <guid>https://sourangshupal.github.io/posts/intro-to-rag/</guid>
+  <pubDate>Tue, 09 Dec 2025 18:30:00 GMT</pubDate>
+  <media:content url="https://sourangshupal.github.io/posts/intro-to-rag/rag-pipeline.png" medium="image" type="image/png"/>
+</item>
+<item>
+  <title>LLM Fundamentals Every Engineer Should Know</title>
+  <dc:creator>Sourangshu Pal</dc:creator>
+  <link>https://sourangshupal.github.io/posts/llm-fundamentals/</link>
+  <description><![CDATA[ 
+
+
+
+
+<p>Building on top of large language models is mostly an API integration problem. But when things break — and they will — you need to know what’s actually happening inside. This post covers the concepts that matter most for engineers working with LLMs in production.</p>
+<section id="tokens-not-words" class="level2">
+<h2 class="anchored" data-anchor-id="tokens-not-words">Tokens, Not Words</h2>
+<p>LLMs don’t see words. They see <em>tokens</em> — subword units produced by a byte-pair encoding (BPE) tokenizer. The rule of thumb: 1 token ≈ 0.75 English words, or ~4 characters.</p>
+<p>This matters for three reasons:</p>
+<ul>
+<li><strong>Cost</strong>: pricing is per-token, not per-word</li>
+<li><strong>Limits</strong>: context windows are measured in tokens</li>
+<li><strong>Surprises</strong>: <code>"unhelpful"</code> might be 1 token while <code>"xyyzz4928"</code> might be 5</li>
+</ul>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> tiktoken</span>
+<span id="cb1-2"></span>
+<span id="cb1-3">enc <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> tiktoken.encoding_for_model(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"gpt-4o"</span>)</span>
+<span id="cb1-4">tokens <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> enc.encode(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"The transformer architecture scales remarkably well."</span>)</span>
+<span id="cb1-5"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">len</span>(tokens))  <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># 9</span></span></code></pre></div></div>
+<p>Always count tokens before sending to the API — a request that exceeds the context window throws a hard error.</p>
+</section>
+<section id="context-windows" class="level2">
+<h2 class="anchored" data-anchor-id="context-windows">Context Windows</h2>
+<p>The context window is the total number of tokens the model can “see” at once — input plus output combined. GPT-4o supports 128k tokens. This is large enough that most applications fit comfortably, but naive approaches still hit limits:</p>
+<ul>
+<li>System prompt: ~500 tokens</li>
+<li>Retrieved context (RAG): 5 chunks × 512 tokens = 2,560 tokens</li>
+<li>Conversation history: grows without bound if you don’t truncate</li>
+</ul>
+<p><strong>The practical rule:</strong> reserve at least 4k tokens for the model’s output. Everything else is input budget.</p>
+</section>
+<section id="temperature-and-sampling" class="level2">
+<h2 class="anchored" data-anchor-id="temperature-and-sampling">Temperature and Sampling</h2>
+<p>Temperature controls how “creative” the model is. Technically, it scales the logit distribution before softmax — higher values flatten the distribution (more randomness), lower values sharpen it (more deterministic).</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Temperature</th>
+<th>Use Case</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>0.0</code></td>
+<td>Fact extraction, classification, structured output</td>
+</tr>
+<tr class="even">
+<td><code>0.3–0.5</code></td>
+<td>Summarization, Q&amp;A systems</td>
+</tr>
+<tr class="odd">
+<td><code>0.7–1.0</code></td>
+<td>Creative writing, brainstorming</td>
+</tr>
+<tr class="even">
+<td><code>&gt;1.0</code></td>
+<td>Rarely useful in production</td>
+</tr>
+</tbody>
+</table>
+<p>For RAG and data pipelines, always use <code>temperature=0.0</code>. You want reproducible, factual answers — not creative ones.</p>
+</section>
+<section id="system-prompts-are-load-bearing" class="level2">
+<h2 class="anchored" data-anchor-id="system-prompts-are-load-bearing">System Prompts Are Load-Bearing</h2>
+<p>The system prompt shapes everything. A weak system prompt is the most common reason a “good model” gives bad results. Key principles:</p>
+<ul>
+<li>Be explicit about what the model should and should not do</li>
+<li>State the output format, not just the task</li>
+<li>Include examples (few-shot) for complex or unusual tasks</li>
+<li>Test it: prompt injection is real, and adversarial users will try to override it</li>
+</ul>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1">SYSTEM <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"""You are a technical support assistant.</span></span>
+<span id="cb2-2"><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">Answer only questions about our product.</span></span>
+<span id="cb2-3"><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">If the question is off-topic, say: "I can only answer questions about Product X."</span></span>
+<span id="cb2-4"><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">Always respond in plain English, no markdown.</span></span>
+<span id="cb2-5"><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"""</span></span></code></pre></div></div>
+</section>
+<section id="hallucinations-are-a-probability-problem" class="level2">
+<h2 class="anchored" data-anchor-id="hallucinations-are-a-probability-problem">Hallucinations Are a Probability Problem</h2>
+<p>LLMs are not search engines. They predict the next probable token. When the model doesn’t “know” something, it produces plausible-sounding output — which is a hallucination.</p>
+<p>Mitigation strategies ranked by effectiveness:</p>
+<ol type="1">
+<li><strong>RAG</strong> — ground answers in retrieved documents, include the source</li>
+<li><strong>Self-consistency</strong> — sample the same question 3× at <code>temperature=0.7</code>, return the majority answer</li>
+<li><strong>Structured output</strong> — force the model to output JSON with a <code>"confidence"</code> field; set a threshold</li>
+<li><strong>Verification prompts</strong> — ask the model “Is the answer above supported by the context?” as a second call</li>
+</ol>
+<p>None of these eliminate hallucinations. They reduce them.</p>
+</section>
+<section id="the-real-cost-of-long-context" class="level2">
+<h2 class="anchored" data-anchor-id="the-real-cost-of-long-context">The Real Cost of Long Context</h2>
+<p>128k token context windows are impressive, but “lost in the middle” is a real phenomenon: LLMs attend more strongly to content at the beginning and end of the context window. Content buried in the middle gets underweighted.</p>
+<p>Practical consequences:</p>
+<ul>
+<li>Put the most important instructions at the <strong>top</strong> of the system prompt</li>
+<li>In RAG, put the highest-ranked chunk <strong>first</strong> in the context block</li>
+<li>Don’t assume adding more context always improves quality — sometimes it degrades it</li>
+</ul>
+</section>
+<section id="structured-outputs" class="level2">
+<h2 class="anchored" data-anchor-id="structured-outputs">Structured Outputs</h2>
+<p>Modern OpenAI models support JSON mode and structured outputs via response schemas. Use these whenever you need machine-readable responses.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">from</span> pydantic <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> BaseModel</span>
+<span id="cb3-2"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">from</span> openai <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> AsyncOpenAI</span>
+<span id="cb3-3"></span>
+<span id="cb3-4"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">class</span> AnalysisResult(BaseModel):</span>
+<span id="cb3-5">    sentiment: <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">str</span></span>
+<span id="cb3-6">    confidence: <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">float</span></span>
+<span id="cb3-7">    summary: <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">str</span></span>
+<span id="cb3-8"></span>
+<span id="cb3-9">client <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> AsyncOpenAI()</span>
+<span id="cb3-10"></span>
+<span id="cb3-11">response <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">await</span> client.beta.chat.completions.parse(</span>
+<span id="cb3-12">    model<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"gpt-4o"</span>,</span>
+<span id="cb3-13">    messages<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>[{<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"role"</span>: <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"user"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"content"</span>: <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Analyze: 'The product is excellent but shipping was slow.'"</span>}],</span>
+<span id="cb3-14">    response_format<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>AnalysisResult,</span>
+<span id="cb3-15">)</span>
+<span id="cb3-16">result <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> response.choices[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>].message.parsed  <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># typed AnalysisResult object</span></span></code></pre></div></div>
+<p>This is more reliable than asking the model to “respond in JSON” and then parsing the output yourself.</p>
+</section>
+<section id="prompt-caching" class="level2">
+<h2 class="anchored" data-anchor-id="prompt-caching">Prompt Caching</h2>
+<p>If your system prompt is large and repeated across many calls, OpenAI’s prompt caching reduces latency and cost. Cached input tokens cost 50% less. The cache key is based on the exact prefix — so keep your system prompt stable and put dynamic content at the end.</p>
+<p>Understanding these fundamentals turns debugging from guesswork into diagnosis. When an LLM application fails, the root cause is almost always one of: token budget exceeded, temperature too high for a deterministic task, system prompt underspecified, or context not properly injected.</p>
+
+
+</section>
+
+ ]]></description>
+  <category>LLM</category>
+  <category>ML</category>
+  <category>Fundamentals</category>
+  <guid>https://sourangshupal.github.io/posts/llm-fundamentals/</guid>
+  <pubDate>Thu, 04 Dec 2025 18:30:00 GMT</pubDate>
+</item>
+<item>
+  <title>Vector Databases Explained</title>
+  <dc:creator>Sourangshu Pal</dc:creator>
+  <link>https://sourangshupal.github.io/posts/vector-databases/</link>
+  <description><![CDATA[ 
+
+
+
+
+<p>Every RAG system, semantic search engine, and recommendation feature built on embeddings needs a vector database. But “vector database” is a term that gets overloaded. This post explains what’s actually happening, where the complexity lives, and how to configure Qdrant — the best open-source option — for production use.</p>
+<section id="what-problem-do-they-solve" class="level2">
+<h2 class="anchored" data-anchor-id="what-problem-do-they-solve">What Problem Do They Solve?</h2>
+<p>An embedding model turns text (or images, audio, etc.) into a dense float vector — say, 1536 or 3072 numbers. Semantic similarity maps to geometric proximity: similar meanings → nearby vectors in the embedding space.</p>
+<p>The search problem is: given a query vector, find the k most similar vectors in a collection of millions or billions. Exact nearest neighbor search is O(n) — you’d compute the cosine distance between your query and every stored vector. At 10M vectors with 1536 dimensions, that’s 30 billion float operations per query. Too slow.</p>
+<p>Vector databases solve this with <strong>Approximate Nearest Neighbor (ANN)</strong> algorithms. They trade a small accuracy loss for orders-of-magnitude speed gains.</p>
+</section>
+<section id="how-hnsw-works" class="level2">
+<h2 class="anchored" data-anchor-id="how-hnsw-works">How HNSW Works</h2>
+<p>The dominant ANN algorithm today is <strong>Hierarchical Navigable Small World (HNSW)</strong>. The key intuitions:</p>
+<ol type="1">
+<li><strong>Graph structure</strong>: Vectors are nodes. Similar vectors are connected by edges.</li>
+<li><strong>Hierarchical layers</strong>: Multiple layers of graphs, coarser at the top, denser at the bottom. Entry is at the top layer.</li>
+<li><strong>Greedy search</strong>: Start at a random node in the top layer, greedily traverse to the nearest neighbor, then descend to the next layer and repeat.</li>
+</ol>
+<p>The result: search is O(log n). At 10M vectors, you’re exploring hundreds of candidates instead of millions.</p>
+<p><strong>The two knobs that matter for HNSW:</strong></p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Effect</th>
+<th>Default</th>
+<th>When to Increase</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>m</code></td>
+<td>Edges per node</td>
+<td>16</td>
+<td>Higher recall on sparse data</td>
+</tr>
+<tr class="even">
+<td><code>ef_construct</code></td>
+<td>Build-time search width</td>
+<td>100</td>
+<td>Better index quality, slower build</td>
+</tr>
+</tbody>
+</table>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">from</span> qdrant_client.models <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> VectorParams, Distance, HnswConfigDiff</span>
+<span id="cb1-2"></span>
+<span id="cb1-3"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">await</span> client.create_collection(</span>
+<span id="cb1-4">    collection_name<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"my_docs"</span>,</span>
+<span id="cb1-5">    vectors_config<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>{</span>
+<span id="cb1-6">        <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"dense"</span>: VectorParams(</span>
+<span id="cb1-7">            size<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">3072</span>,</span>
+<span id="cb1-8">            distance<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>Distance.COSINE,</span>
+<span id="cb1-9">            hnsw_config<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>HnswConfigDiff(</span>
+<span id="cb1-10">                m<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">16</span>,           <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># standard</span></span>
+<span id="cb1-11">                ef_construct<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">100</span>,  <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># increase to 200 for better recall</span></span>
+<span id="cb1-12">            ),</span>
+<span id="cb1-13">        )</span>
+<span id="cb1-14">    },</span>
+<span id="cb1-15">)</span></code></pre></div></div>
+</section>
+<section id="dense-vs.-sparse-vs.-hybrid-search" class="level2">
+<h2 class="anchored" data-anchor-id="dense-vs.-sparse-vs.-hybrid-search">Dense vs.&nbsp;Sparse vs.&nbsp;Hybrid Search</h2>
+<section id="dense-vectors" class="level3">
+<h3 class="anchored" data-anchor-id="dense-vectors">Dense Vectors</h3>
+<p>Generated by neural embedding models. Capture semantic meaning. Struggle with exact keyword matching and rare terms (e.g., product codes, proper nouns not in training data).</p>
+</section>
+<section id="sparse-vectors-bm25-splade" class="level3">
+<h3 class="anchored" data-anchor-id="sparse-vectors-bm25-splade">Sparse Vectors (BM25 / SPLADE)</h3>
+<p>The classic keyword search approach. Each dimension corresponds to a vocabulary term. Excellent at exact matching, terrible at synonyms and paraphrase.</p>
+</section>
+<section id="hybrid-best-of-both" class="level3">
+<h3 class="anchored" data-anchor-id="hybrid-best-of-both">Hybrid: Best of Both</h3>
+<p>Qdrant supports hybrid search natively using Reciprocal Rank Fusion (RRF) — run both retrievals, merge the ranked lists, take the top-k from the merged result.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">from</span> qdrant_client.models <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> Prefetch, FusionQuery, Fusion, SparseVector</span>
+<span id="cb2-2"></span>
+<span id="cb2-3">results <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">await</span> client.query_points(</span>
+<span id="cb2-4">    collection_name<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"my_docs"</span>,</span>
+<span id="cb2-5">    prefetch<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>[</span>
+<span id="cb2-6">        Prefetch(query<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>dense_vector, using<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"dense"</span>, limit<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">20</span>),</span>
+<span id="cb2-7">        Prefetch(query<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>SparseVector(indices<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>sparse_indices, values<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>sparse_values),</span>
+<span id="cb2-8">                 using<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"sparse"</span>, limit<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">20</span>),</span>
+<span id="cb2-9">    ],</span>
+<span id="cb2-10">    query<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>FusionQuery(fusion<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>Fusion.RRF),</span>
+<span id="cb2-11">    limit<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">5</span>,</span>
+<span id="cb2-12">    with_payload<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">True</span>,</span>
+<span id="cb2-13">)</span></code></pre></div></div>
+<p>For most production RAG systems, hybrid search improves recall by 10–20% over dense-only, especially on domain-specific or technical content.</p>
+</section>
+</section>
+<section id="payload-filtering" class="level2">
+<h2 class="anchored" data-anchor-id="payload-filtering">Payload Filtering</h2>
+<p>A vector database isn’t just for retrieval — you also need to filter by metadata. Qdrant stores arbitrary JSON payloads alongside vectors and can filter at query time without a post-processing step.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">from</span> qdrant_client.models <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> Filter, FieldCondition, MatchValue</span>
+<span id="cb3-2"></span>
+<span id="cb3-3">results <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">await</span> client.query_points(</span>
+<span id="cb3-4">    collection_name<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"my_docs"</span>,</span>
+<span id="cb3-5">    query<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>query_vector,</span>
+<span id="cb3-6">    using<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"dense"</span>,</span>
+<span id="cb3-7">    query_filter<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>Filter(</span>
+<span id="cb3-8">        must<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>[</span>
+<span id="cb3-9">            FieldCondition(key<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"source"</span>, match<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>MatchValue(value<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"technical_manual"</span>)),</span>
+<span id="cb3-10">            FieldCondition(key<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"year"</span>, <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">range</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>{<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"gte"</span>: <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2024</span>}),</span>
+<span id="cb3-11">        ]</span>
+<span id="cb3-12">    ),</span>
+<span id="cb3-13">    limit<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">5</span>,</span>
+<span id="cb3-14">)</span></code></pre></div></div>
+<p><strong>Important:</strong> Create payload indexes for fields you filter on. Without an index, Qdrant scans the full payload for every candidate — that erases the ANN speed advantage.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">await</span> client.create_payload_index(</span>
+<span id="cb4-2">    collection_name<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"my_docs"</span>,</span>
+<span id="cb4-3">    field_name<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"source"</span>,</span>
+<span id="cb4-4">    field_schema<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"keyword"</span>,</span>
+<span id="cb4-5">)</span></code></pre></div></div>
+</section>
+<section id="choosing-a-vector-database" class="level2">
+<h2 class="anchored" data-anchor-id="choosing-a-vector-database">Choosing a Vector Database</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>DB</th>
+<th>Best For</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Qdrant</strong></td>
+<td>Production open-source</td>
+<td>Rust core, excellent Python SDK, hybrid search built-in</td>
+</tr>
+<tr class="even">
+<td><strong>Pinecone</strong></td>
+<td>Managed cloud, fast setup</td>
+<td>Expensive at scale, less control</td>
+</tr>
+<tr class="odd">
+<td><strong>pgvector</strong></td>
+<td>Already on PostgreSQL</td>
+<td>HNSW support since 0.7.0, but slower than dedicated DBs</td>
+</tr>
+<tr class="even">
+<td><strong>Weaviate</strong></td>
+<td>GraphQL API, multi-modal</td>
+<td>Heavier operationally</td>
+</tr>
+<tr class="odd">
+<td><strong>Chroma</strong></td>
+<td>Local dev and prototyping</td>
+<td>Not production-tested at scale</td>
+</tr>
+</tbody>
+</table>
+<p>For most teams building RAG: <strong>Qdrant on Docker locally, Qdrant Cloud for production</strong>. The API is identical; you change one URL string.</p>
+</section>
+<section id="production-checklist" class="level2">
+<h2 class="anchored" data-anchor-id="production-checklist">Production Checklist</h2>
+<ul class="task-list">
+<li><label><input type="checkbox">Index built with <code>ef_construct &gt;= 100</code>; raise to 200 if recall is below expectations</label></li>
+<li><label><input type="checkbox">Payload indexes created for all filter fields</label></li>
+<li><label><input type="checkbox">Collection backed by persistent storage (not in-memory)</label></li>
+<li><label><input type="checkbox">Async client (<code>AsyncQdrantClient</code>) for all FastAPI or async paths</label></li>
+<li><label><input type="checkbox">Batch upsert — don’t insert individual vectors in a loop</label></li>
+<li><label><input type="checkbox">Collection snapshots scheduled for backup</label></li>
+</ul>
+<p>A vector database is infrastructure. Get it right once, and it runs quietly for years. Get it wrong — missing indexes, sync client in async code, no backups — and you’ll feel it in production.</p>
+
+
+</section>
+
+ ]]></description>
+  <category>Vector DB</category>
+  <category>Qdrant</category>
+  <category>Search</category>
+  <category>Infrastructure</category>
+  <guid>https://sourangshupal.github.io/posts/vector-databases/</guid>
+  <pubDate>Thu, 27 Nov 2025 18:30:00 GMT</pubDate>
+</item>
+</channel>
+</rss>
